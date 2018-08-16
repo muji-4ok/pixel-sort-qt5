@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/"/>
+    <qresource prefix="/icons">
+        <file>save_icon.png</file>
+        <file>open_icon.png</file>
+        <file>reset_icon.png</file>
+        <file>save_as_icon.png</file>
+    </qresource>
+</RCC>
