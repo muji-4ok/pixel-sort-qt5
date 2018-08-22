@@ -16,8 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (!settings.contains("lastDirectory"))
         settings.setValue("lastDirectory", ".");
-
-    connect(this, &MainWindow::imageNeedsUpdate, ui->imageLabel, &ImageLabel::updateImage);
 }
 
 MainWindow::~MainWindow()
@@ -73,8 +71,6 @@ void MainWindow::handleSortResults(QImage result)
 
     displayImage = result;
     ui->imageLabel->setImage(displayImage);
-
-    emit imageNeedsUpdate();
 }
 
 void MainWindow::handleOpenResults(QImage openedImage)
@@ -86,8 +82,6 @@ void MainWindow::handleOpenResults(QImage openedImage)
     canClose = true;
     enableInterface();
     ui->statusBar->showMessage("Opened " + lastOpenedFilename);
-
-    emit imageNeedsUpdate();
 }
 
 void MainWindow::handleSaveResults()
@@ -120,8 +114,6 @@ void MainWindow::on_actionReset_triggered()
 
     ui->imageLabel->setImage(displayImage);
     ui->statusBar->showMessage("Image reset");
-
-    emit imageNeedsUpdate();
 }
 
 void MainWindow::on_actionSave_as_triggered()
@@ -216,11 +208,24 @@ void MainWindow::on_actionPaste_triggered()
                 sourceImage = image;
                 displayImage = sourceImage;
                 ui->imageLabel->setImage(displayImage);
-
-                emit imageNeedsUpdate();
             }
         }
     }
 
 
+}
+
+void MainWindow::on_actionZoom_in_triggered()
+{
+    ui->imageLabel->scrollImage(1);
+}
+
+void MainWindow::on_actionZoom_out_triggered()
+{
+    ui->imageLabel->scrollImage(-1);
+}
+
+void MainWindow::on_actionReset_zoom_triggered()
+{
+    ui->imageLabel->resetScroll();
 }

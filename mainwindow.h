@@ -23,10 +23,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-signals:
-    void imageNeedsUpdate();
-//    void setImageSignal(QImage newImage);
-
 public slots:
     void handleSortResults(QImage resultImage);
     void handleOpenResults(QImage openedImage);
@@ -48,6 +44,12 @@ private slots:
     void on_actionCopy_triggered();
 
     void on_actionPaste_triggered();
+
+    void on_actionZoom_in_triggered();
+
+    void on_actionZoom_out_triggered();
+
+    void on_actionReset_zoom_triggered();
 
 protected:
     virtual void closeEvent(QCloseEvent *) override;
