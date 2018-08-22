@@ -17,14 +17,15 @@ struct Options
     bool toInterval;
     int lowThreshold;
     QString funcType;
+    bool toEdge;
 
     Options() :
         pathType("rows"), maxIntervals(0), randomizeIntervals(false), angle(0), toMerge(false), toReverse(false), toMirror(false),
-        toInterval(false), lowThreshold(0), funcType("lightness") {}
+        toInterval(false), lowThreshold(0), funcType("lightness"), toEdge(false) {}
 
-    Options(QString pt, int mi, bool ri, int a, bool tom, bool tor, bool tomi, bool toi, int lt, QString ft) :
+    Options(QString pt, int mi, bool ri, int a, bool tom, bool tor, bool tomi, bool toi, int lt, QString ft, bool te) :
         pathType(pt), maxIntervals(mi), randomizeIntervals(ri), angle(a), toMerge(tom), toReverse(tor), toMirror(tomi),
-        toInterval(toi), lowThreshold(lt), funcType(ft) {}
+        toInterval(toi), lowThreshold(lt), funcType(ft), toEdge(te) {}
 };
 
 
@@ -48,6 +49,8 @@ private slots:
     void on_pathComboBox_currentTextChanged(const QString &arg1);
 
     void on_doIntervalsCheckBox_stateChanged(int arg1);
+
+    void on_doEdgesCheckBox_stateChanged(int arg1);
 
 private:
     Ui::OptionsDialog *ui;

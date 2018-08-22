@@ -3,6 +3,8 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QThread>
+#include <QClipboard>
+#include <QMimeData>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,10 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!settings.contains("lastDirectory"))
         settings.setValue("lastDirectory", ".");
 
-    QObject::connect(this,
-                     &MainWindow::imageNeedsUpdate,
-                     ui->imageLabel,
-                     &ImageLabel::updateImage);
+    connect(this, &MainWindow::imageNeedsUpdate, ui->imageLabel, &ImageLabel::updateImage);
 }
 
 MainWindow::~MainWindow()
@@ -42,6 +41,7 @@ void MainWindow::on_actionOpen_triggered()
     lastSavedFilename = QString();
     lastOpenedFilename = filename;
 
+    canClose = false;
     disableInterface();
 
     OpenThread *thread = new OpenThread(this, filename);
@@ -83,6 +83,7 @@ void MainWindow::handleOpenResults(QImage openedImage)
     displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
     ui->imageLabel->setImage(displayImage);
 
+    canClose = true;
     enableInterface();
     ui->statusBar->showMessage("Opened " + lastOpenedFilename);
 
@@ -91,6 +92,7 @@ void MainWindow::handleOpenResults(QImage openedImage)
 
 void MainWindow::handleSaveResults()
 {
+    canClose = true;
     enableInterface();
     ui->statusBar->showMessage("Saved " + lastSavedFilename);
 }
@@ -138,6 +140,7 @@ void MainWindow::on_actionSave_as_triggered()
     if (filename.isNull())
         return;
 
+    canClose = false;
     disableInterface();
 
     lastSavedFilename = filename;
@@ -155,6 +158,14 @@ void MainWindow::on_actionSave_triggered()
         saveImage(lastSavedFilename);
     }
 
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (canClose)
+        QMainWindow::closeEvent(event);
+    else
+        event->ignore();
 }
 
 void MainWindow::enableInterface()
@@ -179,4 +190,37 @@ void MainWindow::saveImage(QString filename)
     connect(thread, &SaveThread::resultReady, this, &MainWindow::handleSaveResults);
     connect(thread, &SaveThread::finished, thread, &QObject::deleteLater);
     thread->start();
+}
+
+void MainWindow::on_actionCopy_triggered()
+{
+    if (displayImage.isNull())
+        return;
+
+    QClipboard *clibboard = QGuiApplication::clipboard();
+    clibboard->setImage(displayImage);
+}
+
+void MainWindow::on_actionPaste_triggered()
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+
+    if (const QMimeData *mimeData = clipboard->mimeData())
+    {
+        if (mimeData->hasImage())
+        {
+            const QImage image = qvariant_cast<QImage>(mimeData->imageData());
+
+            if (!image.isNull())
+            {
+                sourceImage = image;
+                displayImage = sourceImage;
+                ui->imageLabel->setImage(displayImage);
+
+                emit imageNeedsUpdate();
+            }
+        }
+    }
+
+
 }

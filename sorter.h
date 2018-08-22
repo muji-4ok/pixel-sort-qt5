@@ -11,6 +11,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <bitset>
 #include <functional>
 #include <exception>
 #include <vector>
@@ -39,7 +40,7 @@ public:
     Sorter(const QImage &img);
     QImage sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                 int angle, bool toMerge, bool toReverse, bool toMirror,
-                bool toInterval, int lowThreshold, QString funcType);
+                bool toInterval, int lowThreshold, QString funcType, bool toEdge);
 
 private:
     int width;
@@ -54,15 +55,16 @@ private:
     std::vector<std::vector<Point>> rows();
     std::vector<std::vector<Point>> columns();
     std::vector<std::vector<Point>> rectangles();
+    std::vector<std::vector<Point>> octagons();
     std::vector<std::vector<Point>> angled(int angle);
 
-    std::vector<std::vector<Point>> applyIntervals(std::vector<std::vector<Point>>* path, int maxIntervals, bool randomize);
-    void mergeIntoOne(std::vector<std::vector<Point>>* path);
+    void applyIntervals(std::vector<std::vector<Point>> &path, int maxIntervals, bool randomize);
+    void mergeIntoOne(std::vector<std::vector<Point>> &path);
     void mirror(std::vector<std::vector<Point>> &path);
     void reverseSort(std::vector<std::vector<Point>>* path);
 
     cv::Mat getEdges(int lowThreshold, int highThreshold, int kernelSize);
-    std::vector<std::vector<Point>> edgesRows(int lowThreshold, int highThreshold, int kernelSize);
+    void applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold, int highThreshold, int kernelSize);
 };
 
 #endif // SORTER_H

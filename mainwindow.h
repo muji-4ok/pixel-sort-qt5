@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QSettings>
+#include <QCloseEvent>
 #include "sortingthread.h"
 #include "openthread.h"
 #include "savethread.h"
@@ -44,6 +45,13 @@ private slots:
 
     void on_actionSave_triggered();
 
+    void on_actionCopy_triggered();
+
+    void on_actionPaste_triggered();
+
+protected:
+    virtual void closeEvent(QCloseEvent *) override;
+
 private:
     Ui::MainWindow *ui;
     QImage sourceImage;
@@ -51,6 +59,7 @@ private:
     Options options;
     QString lastSavedFilename;
     QString lastOpenedFilename;
+    bool canClose = true;
 
     void enableInterface();
     void disableInterface();

@@ -13,7 +13,8 @@ void SortingThread::run()
 {
     Sorter sorter(inputImage);
     QImage outImage = sorter.sort(options.pathType, options.maxIntervals, options.randomizeIntervals, options.angle, options.toMerge,
-                                  options.toReverse, options.toMirror, options.toInterval, options.lowThreshold, options.funcType);
+                                  options.toReverse, options.toMirror, options.toInterval, options.lowThreshold, options.funcType,
+                                  options.toEdge);
 
     emit resultReady(outImage);
 }

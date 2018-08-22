@@ -46,7 +46,7 @@ Sorter::Sorter(const QImage &img) : image(img)
 
 QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                     int angle, bool toMerge, bool toReverse, bool toMirror,
-                    bool toInterval, int lowThreshold, QString funcType)
+                    bool toInterval, int lowThreshold, QString funcType, bool toEdge)
 {
     std::vector<std::vector<Point>> path;
     std::vector<std::vector<Point>> sortedPath;
@@ -59,16 +59,19 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
         path = rectangles();
     else if (pathType == "angled")
         path = angled(angle);
-    else if (pathType == "edges rows")
-        path = edgesRows(lowThreshold, lowThreshold * 3, 3);
+    else if (pathType == "octagons")
+        path = octagons();
     else
         throw std::runtime_error("no pathType");
 
+    if (toEdge)
+        applyEdges(path, lowThreshold, lowThreshold * 3, 3);
+
     if (toMerge)
-        mergeIntoOne(&path);
+        mergeIntoOne(path);
 
     if (toInterval)
-        path = applyIntervals(&path, maxIntervals, randomizeIntervals);
+        applyIntervals(path, maxIntervals, randomizeIntervals);
 
     sortedPath = path;
 
@@ -246,6 +249,83 @@ std::vector<std::vector<Point>> Sorter::rectangles()
     return out;
 }
 
+bool insideImage(const int &i, const int &j, const int &width, const int &height)
+{
+    return 0 <= i && i < height && 0 <= j && j < width;
+}
+
+std::vector<std::vector<Point>> Sorter::octagons()
+{
+    std::vector<std::vector<Point>> out {};
+
+//    int height = this->height - 1;
+//    int width = this->width - 1;
+    int maxRadius = std::round(std::sqrt(std::pow(height / 2.0, 2) + std::pow(width / 2.0, 2)) * 2 / std::sqrt(2));
+    int i_center = height / 2;
+    int j_center = width / 2;
+    std::vector<std::vector<bool>> pointsDone(maxRadius, std::vector<bool>(maxRadius));
+
+    for (int radius = 0; radius < maxRadius; ++radius)
+    {
+        std::vector<Point> offsetSegment{};
+        out.push_back({});
+        int i_off = 0;
+        int j_off = radius;
+
+        while (true)
+        {
+            if (!pointsDone[i_off][j_off])
+                offsetSegment.push_back(Point(i_off, j_off));
+
+            pointsDone[i_off][j_off] = true;
+
+            if (i_off == radius && j_off == 0)
+                break;
+
+            if (radius % 2 == 0)
+            {
+                if ((i_off + 1) <= radius && !pointsDone[i_off + 1][j_off])
+                {
+                    offsetSegment.push_back(Point(i_off + 1, j_off));
+
+                    pointsDone[i_off + 1][j_off] = true;
+                }
+            }
+
+            if (i_off < radius)
+                ++i_off;
+
+            if (j_off > 0 && !pointsDone[i_off][j_off - 1])
+                --j_off;
+        }
+
+        for (Point &p : offsetSegment)
+            if (insideImage(i_center + p.i, j_center + p.j, width, height))
+                out[radius].push_back(Point(i_center + p.i, j_center + p.j));
+
+        for (int i = offsetSegment.size() - 1; i >= 0; --i)
+            if (insideImage(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j, width, height))
+                out[radius].push_back(Point(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j));
+
+        for (Point &p : offsetSegment)
+            if (insideImage(i_center - p.i, j_center - p.j, width, height))
+                out[radius].push_back(Point(i_center - p.i, j_center - p.j));
+
+        for (int i = offsetSegment.size() - 1; i >= 0; --i)
+            if (insideImage(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j, width, height))
+                out[radius].push_back(Point(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j));
+
+        if (out[radius].size() == 0)
+            continue;
+
+        std::rotate(out[radius].begin(),
+                    out[radius].begin() + (rand() % out[radius].size()),
+                    out[radius].end());
+    }
+
+    return out;
+}
+
 std::vector<std::vector<Point>> Sorter::angled(int angle)
 {
     constexpr double pi = 3.1415926535897;
@@ -365,24 +445,24 @@ std::vector<std::vector<Point>> Sorter::angled(int angle)
     return out;
 }
 
-void Sorter::mergeIntoOne(std::vector<std::vector<Point>>* path)
+void Sorter::mergeIntoOne(std::vector<std::vector<Point>> &path)
 {
     size_t endSize = 0;
 
     #pragma omp parallel for
-    for (int i = 0; i < path->size(); ++i)
-        endSize += (*path)[i].size();
+    for (int i = 0; i < path.size(); ++i)
+        endSize += path[i].size();
 
-    (*path)[0].reserve(endSize);
+    path[0].reserve(endSize);
 
     #pragma omp parallel for ordered
-    for (int i = 1; i < path->size(); ++i)
+    for (int i = 1; i < path.size(); ++i)
     {
         #pragma omp ordered
-        (*path)[0].insert((*path)[0].end(), (*path)[i].begin(), (*path)[i].end());
+        path[0].insert(path[0].end(), path[i].begin(), path[i].end());
     }
 
-    path->erase(path->begin() + 1, path->end());
+    path.erase(path.begin() + 1, path.end());
 
     //while ((*path).size() > 1)
     //{
@@ -422,14 +502,14 @@ void Sorter::mirror(std::vector<std::vector<Point>> &path)
     //std::cout << "Mirror done\n";
 }
 
-std::vector<std::vector<Point>> Sorter::applyIntervals(std::vector<std::vector<Point>>* path, int maxIntervals, bool randomize)
+void Sorter::applyIntervals(std::vector<std::vector<Point>> &path, int maxIntervals, bool randomize)
 {
     std::vector<std::vector<Point>> out{};
 
     if (maxIntervals < 2)
-        return *path;
+        return;
 
-    for (auto &seq : (*path))
+    for (auto &seq : path)
     {
         int start = 0;
 
@@ -456,9 +536,7 @@ std::vector<std::vector<Point>> Sorter::applyIntervals(std::vector<std::vector<P
         }
     }
 
-    //std::cout << "Intervals done\n";
-
-    return out;
+    path = out;
 }
 
 cv::Mat Sorter::getEdges(int lowThreshold, int highThreshold, int kernelSize)
@@ -488,31 +566,35 @@ cv::Mat Sorter::getEdges(int lowThreshold, int highThreshold, int kernelSize)
     return edges;
 }
 
-std::vector<std::vector<Point>> Sorter::edgesRows(int lowThreshold, int highThreshold, int kernelSize)
+void Sorter::applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold, int highThreshold, int kernelSize)
 {
     std::vector<std::vector<Point>> out{};
-    cv::Mat edges = getEdges(lowThreshold, highThreshold, kernelSize);
+    const cv::Mat edges = getEdges(lowThreshold, highThreshold, kernelSize);
 
-    //cv::namedWindow("DEBUGGING", cv::WINDOW_AUTOSIZE);
-    //cv::imshow("DEBUGGING", edges);
-    //cv::waitKey(0);
-
-    for (int i = 0; i < height; ++i)
+    for (int i = 0; i < path.size(); ++i)
     {
-        out.push_back({});
-        unsigned char *row = edges.ptr<unsigned char>(i);
+        bool wasEdge = false;
+        std::vector<Point> segment{};
 
-        for (int j = 0; j < width; ++j)
-            if (row[j] > 0 && out[out.size() - 1].size() > 0)
-                out.push_back({});
-            else
-                out[out.size() - 1].push_back(Point(i, j));
+        for (int j = 0; j < path[i].size(); ++j)
+        {
+            bool edge = edges.at<unsigned char>(path[i][j].i, path[i][j].j) > 0;
 
-        if (out[out.size() - 1].size() == 0)
-            out.erase(out.end() - 1);
+            if (!edge)
+                segment.push_back(path[i][j]);
+
+            if (edge && !wasEdge)
+            {
+                out.push_back(segment);
+                segment = {};
+            }
+
+            wasEdge = edge;
+        }
+
+        if (segment.size() > 0)
+            out.push_back(segment);
     }
 
-    //std::cout << "EdgesRows done\n";
-
-    return out;
+    path = out;
 }
