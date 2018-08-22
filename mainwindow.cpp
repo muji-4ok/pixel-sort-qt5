@@ -162,18 +162,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::enableInterface()
 {
-    this->setCursor(QCursor(Qt::ArrowCursor));
+    QGuiApplication::restoreOverrideCursor();
     ui->menuBar->setEnabled(true);
     ui->sortButton->setEnabled(true);
     ui->optionsButton->setEnabled(true);
+    ui->imageLabel->setEnabled(true);
 }
 
 void MainWindow::disableInterface()
 {
-    this->setCursor(QCursor(Qt::WaitCursor));
+    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     ui->menuBar->setEnabled(false);
     ui->sortButton->setEnabled(false);
     ui->optionsButton->setEnabled(false);
+    ui->imageLabel->setEnabled(false);
 }
 
 void MainWindow::saveImage(QString filename)

@@ -6,7 +6,7 @@
 
 ImageLabel::ImageLabel(QWidget *parent) : QLabel(parent)
 {
-
+    setCursor(Qt::OpenHandCursor);
 }
 
 void ImageLabel::scrollImage(int dir)
