@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (!settings.contains("lastDirectory"))
         settings.setValue("lastDirectory", ".");
+
+    connect(ui->actionQualityZoomCheckBox, &QAction::toggled, ui->imageLabel, &ImageLabel::setQualityZoom);
 }
 
 MainWindow::~MainWindow()
@@ -213,8 +215,6 @@ void MainWindow::on_actionPaste_triggered()
             }
         }
     }
-
-
 }
 
 void MainWindow::on_actionZoom_in_triggered()

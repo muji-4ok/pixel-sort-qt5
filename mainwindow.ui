@@ -19,20 +19,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QPushButton" name="sortButton">
-      <property name="text">
-       <string>Sort</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="optionsButton">
-      <property name="text">
-       <string>Options</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0" colspan="2">
      <widget class="ImageLabel" name="imageLabel">
       <property name="sizePolicy">
@@ -58,6 +44,20 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="optionsButton">
+      <property name="text">
+       <string>Options</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="sortButton">
+      <property name="text">
+       <string>Sort</string>
       </property>
      </widget>
     </item>
@@ -95,6 +95,7 @@
     <addaction name="actionZoom_in"/>
     <addaction name="actionZoom_out"/>
     <addaction name="actionReset_zoom"/>
+    <addaction name="actionQualityZoomCheckBox"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -165,7 +166,7 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionZoomIn">
+  <action name="actionZoom_in">
    <property name="text">
     <string>Zoom in</string>
    </property>
@@ -173,7 +174,7 @@
     <string>Ctrl+Z</string>
    </property>
   </action>
-  <action name="actionZoomOut">
+  <action name="actionZoom_out">
    <property name="text">
     <string>Zoom out</string>
    </property>
@@ -181,24 +182,23 @@
     <string>Ctrl+X</string>
    </property>
   </action>
-  <action name="actionResetZoom">
-   <property name="text">
-    <string>Reset zoom</string>
-   </property>
-  </action>
-  <action name="actionZoom_in">
-   <property name="text">
-    <string>Zoom in</string>
-   </property>
-  </action>
-  <action name="actionZoom_out">
-   <property name="text">
-    <string>Zoom out</string>
-   </property>
-  </action>
   <action name="actionReset_zoom">
    <property name="text">
     <string>Reset zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
+  <action name="actionQualityZoomCheckBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>High quality zoom(may be slow)</string>
+   </property>
+   <property name="statusTip">
+    <string>Enchances quality when downscaling image</string>
    </property>
   </action>
  </widget>

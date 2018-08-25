@@ -54,6 +54,13 @@ void ImageLabel::setImage(QImage newImage)
     repaint();
 }
 
+void ImageLabel::setQualityZoom(bool checked)
+{
+    qualityZoom = checked;
+
+    repaint();
+}
+
 void ImageLabel::resizeEvent(QResizeEvent *)
 {
     if (image.isNull())
@@ -112,8 +119,6 @@ void ImageLabel::paintEvent(QPaintEvent *)
     if (image.isNull())
         return;
 
-    QPainter p(this);
-
     center_x = std::min(image.width() - width() / 2 / scale,
                         std::max(width() / 2 / scale, center_x));
     center_y = std::min(image.height() - height() / 2 / scale,
@@ -139,15 +144,18 @@ void ImageLabel::paintEvent(QPaintEvent *)
         top = 0;
     }
 
-    if (width() < w || height() < h)
+    QRect frame(left, top, w, h);
+    QPainter p(this);
+
+    if (scale < 1 && qualityZoom)
     {
         p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        QPixmap scaledImage = image.copy(frame).scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        p.drawPixmap(drawOffX, drawOffY, scaledImage);
     }
     else
     {
         p.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        p.drawPixmap(QRect(drawOffX, drawOffY, width(), height()), image, frame);
     }
-
-    QRect frame(left, top, w, h);
-    p.drawPixmap(QRect(drawOffX, drawOffY, width(), height()), image, frame);
 }

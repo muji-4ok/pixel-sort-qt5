@@ -21,6 +21,7 @@ public:
 
 public slots:
     void setImage(QImage newImage);
+    void setQualityZoom(bool checked);
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -38,6 +39,7 @@ private:
     double center_x;
     double center_y;
     QPoint lastMousePos;
+    bool qualityZoom = false;
 };
 
 #endif // IMAGELABEL_H
