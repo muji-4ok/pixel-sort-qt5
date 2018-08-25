@@ -3,10 +3,11 @@
 #include <QCursor>
 #include <QPainter>
 #include <QColor>
+#include <QImage>
 
 ImageLabel::ImageLabel(QWidget *parent) : QLabel(parent)
 {
-    setCursor(Qt::OpenHandCursor);
+//    setCursor(Qt::OpenHandCursor);
 }
 
 void ImageLabel::scrollImage(int dir)
@@ -79,6 +80,9 @@ void ImageLabel::wheelEvent(QWheelEvent *event)
 {
     QPoint degrees = event->angleDelta();
     scrollImage(degrees.y());
+
+    QPoint localMousePos = mapFromGlobal(QCursor::pos());
+    capturePixelUnderMouse(localMousePos.x(), localMousePos.y());
 }
 
 void ImageLabel::mousePressEvent(QMouseEvent *event)
@@ -86,7 +90,7 @@ void ImageLabel::mousePressEvent(QMouseEvent *event)
     if (image.isNull())
         return;
 
-    setCursor(Qt::ClosedHandCursor);
+//    setCursor(Qt::ClosedHandCursor);
 
     lastMousePos = event->pos();
 }
@@ -96,14 +100,18 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *event)
     if (image.isNull())
         return;
 
-    QPoint diff = lastMousePos - event->pos();
-    lastMousePos = event->pos();
-    center_x += diff.x() / scale * 0.9 * std::pow(1.001,
-                                                  static_cast<double>(image.width()) / width());
-    center_y += diff.y() / scale * 0.9 * std::pow(1.001,
-                                                  static_cast<double>(image.height()) / height());
+    if (event->buttons() && Qt::LeftButton)
+    {
+        QPoint diff = lastMousePos - event->pos();
+        lastMousePos = event->pos();
+        center_x += diff.x() / scale * 0.9 * std::pow(1.001,
+                                                      static_cast<double>(image.width()) / width());
+        center_y += diff.y() / scale * 0.9 * std::pow(1.001,
+                                                      static_cast<double>(image.height()) / height());
+        repaint();
+    }
 
-    repaint();
+    capturePixelUnderMouse(event->x(), event->y());
 }
 
 void ImageLabel::mouseReleaseEvent(QMouseEvent *)
@@ -111,7 +119,7 @@ void ImageLabel::mouseReleaseEvent(QMouseEvent *)
     if (image.isNull())
         return;
 
-    setCursor(Qt::OpenHandCursor);
+//    setCursor(Qt::OpenHandCursor);
 }
 
 void ImageLabel::paintEvent(QPaintEvent *)
@@ -119,10 +127,7 @@ void ImageLabel::paintEvent(QPaintEvent *)
     if (image.isNull())
         return;
 
-    center_x = std::min(image.width() - width() / 2 / scale,
-                        std::max(width() / 2 / scale, center_x));
-    center_y = std::min(image.height() - height() / 2 / scale,
-                        std::max(height() / 2 / scale, center_y));
+    clampCenter();
 
     int left = center_x - width() / 2 / scale;
     int top = center_y - height() / 2 / scale;
@@ -157,5 +162,49 @@ void ImageLabel::paintEvent(QPaintEvent *)
     {
         p.setRenderHint(QPainter::SmoothPixmapTransform, false);
         p.drawPixmap(QRect(drawOffX, drawOffY, width(), height()), image, frame);
+    }
+}
+
+void ImageLabel::clampCenter()
+{
+    center_x = std::min(image.width() - width() / 2 / scale,
+                        std::max(width() / 2 / scale, center_x));
+    center_y = std::min(image.height() - height() / 2 / scale,
+                        std::max(height() / 2 / scale, center_y));
+}
+
+void ImageLabel::capturePixelUnderMouse(int event_x, int event_y)
+{
+    clampCenter();
+
+    if (scale >= 1)
+    {
+        int left = center_x - width() / 2 / scale;
+        int top = center_y - height() / 2 / scale;
+
+        if (left < 0)
+            left /= 2;
+
+        if (top < 0)
+            top /= 2;
+
+        int x = event_x / scale + left;
+        int y = event_y / scale + top;
+
+        if (0 <= x && x < image.width() && 0 <= y && y < image.height())
+        {
+            QImage im = image.toImage();
+            QColor c = im.pixelColor(x, y);
+
+            emit changeRgbInfo(c);
+        }
+        else
+        {
+            emit changeRgbInfoMessage("Out of range");
+        }
+    }
+    else
+    {
+        emit changeRgbInfoMessage("Too zoomed out");
     }
 }

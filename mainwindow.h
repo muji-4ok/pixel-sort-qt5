@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPixmap>
 #include <QImage>
+#include <QColor>
 #include <QSettings>
 #include <QCloseEvent>
 #include "sortingthread.h"
@@ -27,6 +28,8 @@ public slots:
     void handleSortResults(QImage resultImage);
     void handleOpenResults(QImage openedImage);
     void handleSaveResults();
+
+    void changePixelInfo(const QColor &);
 
 private slots:
     void on_actionOpen_triggered();

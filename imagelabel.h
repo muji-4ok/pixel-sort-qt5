@@ -19,6 +19,10 @@ public:
     void scrollImage(int dir);
     void resetScroll();
 
+signals:
+    void changeRgbInfoMessage(const QString &text);
+    void changeRgbInfo(const QColor &);
+
 public slots:
     void setImage(QImage newImage);
     void setQualityZoom(bool checked);
@@ -40,6 +44,9 @@ private:
     double center_y;
     QPoint lastMousePos;
     bool qualityZoom = false;
+
+    void clampCenter();
+    void capturePixelUnderMouse(int event_x, int event_y);
 };
 
 #endif // IMAGELABEL_H

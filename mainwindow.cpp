@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
         settings.setValue("lastDirectory", ".");
 
     connect(ui->actionQualityZoomCheckBox, &QAction::toggled, ui->imageLabel, &ImageLabel::setQualityZoom);
+    connect(ui->imageLabel, &ImageLabel::changeRgbInfoMessage, ui->pixelInfoLineEdit, &QLineEdit::setText);
+    connect(ui->imageLabel, &ImageLabel::changeRgbInfo, this, &MainWindow::changePixelInfo);
 }
 
 MainWindow::~MainWindow()
@@ -91,6 +93,29 @@ void MainWindow::handleSaveResults()
     canClose = true;
     enableInterface();
     ui->statusBar->showMessage("Saved " + lastSavedFilename);
+}
+
+void MainWindow::changePixelInfo(const QColor &c)
+{
+    QString infoType = ui->pixelInfoComboBox->currentText();
+
+    ui->pixelInfoColorLabel->setStyleSheet("QLabel { background-color : rgb(" +
+                                           QString::number(c.red()) + "," +
+                                           QString::number(c.green()) + "," +
+                                           QString::number(c.blue()) + "); border: 2px solid black }");
+
+    if (infoType == "RGB")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.red()) + " " + QString::number(c.green()) + " " + QString::number(c.blue()));
+    }
+    else if (infoType == "HSV")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.hue() + 1) + " " + QString::number(c.saturation()) + " " + QString::number(c.value()));
+    }
+    else if (infoType == "lightness")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.red() + c.green() + c.blue()));
+    }
 }
 
 void MainWindow::on_optionsButton_clicked()
@@ -169,6 +194,8 @@ void MainWindow::enableInterface()
     ui->sortButton->setEnabled(true);
     ui->optionsButton->setEnabled(true);
     ui->imageLabel->setEnabled(true);
+    ui->pixelInfoLineEdit->setEnabled(true);
+    ui->pixelInfoComboBox->setEnabled(true);
 }
 
 void MainWindow::disableInterface()
@@ -178,6 +205,8 @@ void MainWindow::disableInterface()
     ui->sortButton->setEnabled(false);
     ui->optionsButton->setEnabled(false);
     ui->imageLabel->setEnabled(false);
+    ui->pixelInfoLineEdit->setEnabled(false);
+    ui->pixelInfoComboBox->setEnabled(false);
 }
 
 void MainWindow::saveImage(QString filename)
