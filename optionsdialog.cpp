@@ -1,5 +1,6 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
+#include <QDebug>
 
 OptionsDialog::OptionsDialog(QWidget *parent) :
     QDialog(parent),
@@ -30,7 +31,7 @@ Options OptionsDialog::getOptions()
 {
     Options options(ui->pathComboBox->currentText(), ui->intervalSlider->value(), ui->randomizeCheckBox->isChecked(),
                     ui->angleSlider->value(), ui->mergeCheckBox->isChecked(), ui->reverseCheckBox->isChecked(), ui->mirrorCheckBox->isChecked(),
-                    ui->doIntervalsCheckBox->isChecked(), ui->thresholdSlider->value(), ui->funcComboBox->currentText(),
+                    ui->doIntervalsCheckBox->isChecked(), ui->thresholdSlider->value(), ui->orderFuncListWidget->getOrder(),
                     ui->doEdgesCheckBox->isChecked());
     return options;
 }
@@ -46,7 +47,7 @@ void OptionsDialog::setOptions(Options &options)
     ui->mirrorCheckBox->setChecked(options.toMirror);
     ui->doIntervalsCheckBox->setChecked(options.toInterval);
     ui->thresholdSlider->setValue(options.lowThreshold);
-    ui->funcComboBox->setCurrentText(options.funcType);
+    ui->orderFuncListWidget->setOrder(options.funcs);
     ui->doEdgesCheckBox->setChecked(options.toEdge);
 }
 

@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <QSlider>
 #include <QSpinBox>
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <vector>
 
 struct Options
 {
@@ -16,16 +19,16 @@ struct Options
     bool toMirror;
     bool toInterval;
     int lowThreshold;
-    QString funcType;
+    std::vector<QString> funcs;
     bool toEdge;
 
     Options() :
         pathType("rows"), maxIntervals(0), randomizeIntervals(false), angle(0), toMerge(false), toReverse(false), toMirror(false),
-        toInterval(false), lowThreshold(0), funcType("lightness"), toEdge(false) {}
+        toInterval(false), lowThreshold(0), funcs{"lightness"}, toEdge(false) {}
 
-    Options(QString pt, int mi, bool ri, int a, bool tom, bool tor, bool tomi, bool toi, int lt, QString ft, bool te) :
+    Options(QString pt, int mi, bool ri, int a, bool tom, bool tor, bool tomi, bool toi, int lt, std::vector<QString> funcs, bool te) :
         pathType(pt), maxIntervals(mi), randomizeIntervals(ri), angle(a), toMerge(tom), toReverse(tor), toMirror(tomi),
-        toInterval(toi), lowThreshold(lt), funcType(ft), toEdge(te) {}
+        toInterval(toi), lowThreshold(lt), funcs(funcs), toEdge(te) {}
 };
 
 

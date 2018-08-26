@@ -31,7 +31,9 @@ SOURCES += \
     optionsdialog.cpp \
     sorter.cpp \
     openthread.cpp \
-    savethread.cpp
+    savethread.cpp \
+    avaliablefunclistwidget.cpp \
+    orderfunclistwidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +42,9 @@ HEADERS += \
     optionsdialog.h \
     sorter.h \
     openthread.h \
-    savethread.h
+    savethread.h \
+    avaliablefunclistwidget.h \
+    orderfunclistwidget.h
 
 FORMS += \
         mainwindow.ui \

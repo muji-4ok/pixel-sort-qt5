@@ -46,7 +46,7 @@ Sorter::Sorter(const QImage &img) : image(img)
 
 QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                     int angle, bool toMerge, bool toReverse, bool toMirror,
-                    bool toInterval, int lowThreshold, QString funcType, bool toEdge)
+                    bool toInterval, int lowThreshold, std::vector<QString> funcs, bool toEdge)
 {
     std::vector<std::vector<Point>> path;
     std::vector<std::vector<Point>> sortedPath;
@@ -74,8 +74,7 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
         applyIntervals(path, maxIntervals, randomizeIntervals);
 
     sortedPath = path;
-    QString funcTypes[3] = {"hue", "saturation", "value"};
-    Comparator cmp(this, funcTypes);
+    Comparator cmp(this, funcs);
 
     if (sortedPath.size() > 1)
     {
@@ -555,26 +554,26 @@ void Sorter::applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold,
     path = out;
 }
 
-Comparator::Comparator(Sorter *s, QString funcTypes[3]) : sorter(s)
+Comparator::Comparator(Sorter *s, std::vector<QString> funcTypes) : sorter(s)
 {
-    for (int i = 0; i < 3; ++i)
+    for (QString funcType : funcTypes)
     {
-        if (funcTypes[i] == "lightness")
-            funcs[i] = [](const QColor &c1, const QColor &c2){
+        if (funcType == "lightness")
+            funcs.push_back([](const QColor &c1, const QColor &c2){
                 return (c1.red() + c1.green() + c1.blue()) - (c2.red() + c2.green() + c2.blue());
-            };
-        else if (funcTypes[i] == "hue")
-            funcs[i] = [](const QColor &c1, const QColor &c2){
+            });
+        else if (funcType == "hue")
+            funcs.push_back([](const QColor &c1, const QColor &c2){
                 return c1.hue() - c2.hue();
-            };
-        else if (funcTypes[i] == "saturation")
-            funcs[i] = [](const QColor &c1, const QColor &c2){
+            });
+        else if (funcType == "saturation")
+            funcs.push_back([](const QColor &c1, const QColor &c2){
                 return c1.saturation() - c2.saturation();
-            };
-        else if (funcTypes[i] == "value")
-            funcs[i] = [](const QColor &c1, const QColor &c2){
+            });
+        else if (funcType == "value")
+            funcs.push_back([](const QColor &c1, const QColor &c2){
                 return c1.value() - c2.value();
-            };
+            });
         else
             throw std::runtime_error("Incorrect sort func type");
     }

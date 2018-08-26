@@ -40,7 +40,7 @@ public:
     Sorter(const QImage &img);
     QImage sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                 int angle, bool toMerge, bool toReverse, bool toMirror,
-                bool toInterval, int lowThreshold, QString funcType, bool toEdge);
+                bool toInterval, int lowThreshold, std::vector<QString> funcs, bool toEdge);
     QColor pixelAt(int i, int j);
 
 private:
@@ -71,12 +71,12 @@ private:
 class Comparator
 {
 public:
-    Comparator(Sorter *s, QString funcTypes[3]);
+    Comparator(Sorter *s, std::vector<QString> funcTypes);
     bool operator() (const Point& p1, const Point&p2) const;
 
 private:
     Sorter *sorter;
-    std::function<int(const QColor&, const QColor&)> funcs[3];
+    std::vector< std::function< int(const QColor&, const QColor&) > > funcs{};
 };
 
 #endif // SORTER_H
