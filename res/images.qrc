@@ -6,5 +6,10 @@
         <file>reset_icon.png</file>
         <file>save_as_icon.png</file>
         <file>app_icon.png</file>
+        <file>reset_zoom_icon.png</file>
+        <file>zoom_in_icon.png</file>
+        <file>zoom_out_icon.png</file>
+        <file>paste_icon.png</file>
+        <file>copy_icon.png</file>
     </qresource>
 </RCC>

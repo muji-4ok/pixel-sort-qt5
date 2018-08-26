@@ -213,14 +213,12 @@ std::vector<std::vector<Point>> Sorter::octagons()
 {
     std::vector<std::vector<Point>> out {};
 
-//    int height = this->height - 1;
-//    int width = this->width - 1;
     int maxRadius = std::round(std::sqrt(std::pow(height / 2.0, 2) + std::pow(width / 2.0, 2)) * 2 / std::sqrt(2));
     int i_center = height / 2;
     int j_center = width / 2;
     std::vector<std::vector<bool>> pointsDone(maxRadius, std::vector<bool>(maxRadius));
 
-    for (int radius = 0; radius < maxRadius; ++radius)
+    for (int radius = 0, row = 0; radius < maxRadius; ++radius, ++row)
     {
         std::vector<Point> offsetSegment{};
         out.push_back({});
@@ -256,26 +254,26 @@ std::vector<std::vector<Point>> Sorter::octagons()
 
         for (Point &p : offsetSegment)
             if (insideImage(i_center + p.i, j_center + p.j, width, height))
-                out[radius].push_back(Point(i_center + p.i, j_center + p.j));
+                out[row].push_back(Point(i_center + p.i, j_center + p.j));
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
             if (insideImage(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j, width, height))
-                out[radius].push_back(Point(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j));
+                out[row].push_back(Point(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j));
 
         for (Point &p : offsetSegment)
             if (insideImage(i_center - p.i, j_center - p.j, width, height))
-                out[radius].push_back(Point(i_center - p.i, j_center - p.j));
+                out[row].push_back(Point(i_center - p.i, j_center - p.j));
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
             if (insideImage(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j, width, height))
-                out[radius].push_back(Point(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j));
+                out[row].push_back(Point(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j));
 
-        if (out[radius].size() == 0)
+        if (out[row].size() == 0)
             continue;
 
-        std::rotate(out[radius].begin(),
-                    out[radius].begin() + (rand() % out[radius].size()),
-                    out[radius].end());
+        std::rotate(out[row].begin(),
+                    out[row].begin() + (rand() % out[row].size()),
+                    out[row].end());
     }
 
     return out;

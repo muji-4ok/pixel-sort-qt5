@@ -214,6 +214,10 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="res/images.qrc">
+     <normaloff>:/icons/copy_icon.png</normaloff>:/icons/copy_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -222,6 +226,10 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="res/images.qrc">
+     <normaloff>:/icons/paste_icon.png</normaloff>:/icons/paste_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -230,6 +238,10 @@
    </property>
   </action>
   <action name="actionZoom_in">
+   <property name="icon">
+    <iconset resource="res/images.qrc">
+     <normaloff>:/icons/zoom_in_icon.png</normaloff>:/icons/zoom_in_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom in</string>
    </property>
@@ -238,6 +250,10 @@
    </property>
   </action>
   <action name="actionZoom_out">
+   <property name="icon">
+    <iconset resource="res/images.qrc">
+     <normaloff>:/icons/zoom_out_icon.png</normaloff>:/icons/zoom_out_icon.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom out</string>
    </property>

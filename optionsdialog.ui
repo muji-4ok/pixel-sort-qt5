@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>459</width>
-    <height>447</height>
+    <width>464</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -536,12 +536,12 @@
      </property>
      <item>
       <property name="text">
-       <string>lightness</string>
+       <string>hue</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>hue</string>
+       <string>lightness</string>
       </property>
      </item>
      <item>
@@ -565,10 +565,14 @@
       </sizepolicy>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set priority for sorting functions&lt;/p&gt;&lt;p&gt;(top to bottom)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set priority for sorting functions - drag items from upper box here&lt;/p&gt;&lt;p&gt;(top to bottom)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string/>
      </property>
      <property name="whatsThis">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set priority for sorting functions&lt;/p&gt;&lt;p&gt;(top to bottom)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>Set priority for sorting functions - drag items from upper box here
+(top to bottom)</string>
      </property>
      <property name="dragDropMode">
       <enum>QAbstractItemView::DragDrop</enum>

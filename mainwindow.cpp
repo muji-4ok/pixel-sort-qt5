@@ -32,7 +32,11 @@ void MainWindow::on_actionOpen_triggered()
     QSettings settings("EgorCO", "Pixel Sorter");
 
     QString filename = QFileDialog::getOpenFileName(this, "Open image", settings.value("lastDirectory").toString(),
-                                                    "Image Files (*.png *.jpg *.jpeg *.bmp *.gif *.pbm *.pgm *.ppm *.xbm *.xpm)");
+                                                    QString("Image Files (*.png *.jpg *.jpeg *.bmp *.gif *.pbm *.pgm *.ppm *.xbm *.xpm);;") +
+                                                    "PNG (*.png);;" +
+                                                    "JPEG (*.jpg *.jpeg);;" +
+                                                    "GIF (*.gif);;" +
+                                                    "Bitmap (*.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
 
     if (filename.isNull())
         return;
@@ -79,6 +83,14 @@ void MainWindow::handleSortResults(QImage result)
 
 void MainWindow::handleOpenResults(QImage openedImage)
 {
+    if (openedImage.isNull())
+    {
+        ui->statusBar->showMessage("Failed to open " + lastOpenedFilename);
+        canClose = true;
+        enableInterface();
+        return;
+    }
+
     sourceImage = openedImage;
     displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
     ui->imageLabel->setImage(displayImage);
@@ -154,7 +166,11 @@ void MainWindow::on_actionSave_as_triggered()
     QSettings settings("EgorCO", "Pixel Sorter");
 
     QString filename = QFileDialog::getSaveFileName(this, "Save image", settings.value("lastDirectory").toString(),
-                                                    "Image Files (*.png *.jpg *.jpeg *.bmp *.gif *.pbm *.pgm *.ppm *.xbm *.xpm)");
+                                                    QString("Image Files (*.png *.jpg *.jpeg *.bmp *.gif *.pbm *.pgm *.ppm *.xbm *.xpm);;") +
+                                                    "PNG (*.png);;" +
+                                                    "JPEG (*.jpg *.jpeg);;" +
+                                                    "GIF (*.gif);;" +
+                                                    "Bitmap (*.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
 
     if (filename.isNull())
         return;
