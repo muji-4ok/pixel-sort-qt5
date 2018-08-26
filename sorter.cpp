@@ -74,67 +74,18 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
         applyIntervals(path, maxIntervals, randomizeIntervals);
 
     sortedPath = path;
+    QString funcTypes[3] = {"hue", "saturation", "value"};
+    Comparator cmp(this, funcTypes);
 
     if (sortedPath.size() > 1)
     {
-        if (funcType == "lightness")
-        {
-            #pragma omp parallel for
-            for (int i = 0; i < sortedPath.size(); ++i)
-                std::stable_sort(sortedPath[i].begin(), sortedPath[i].end(), [this](const Point &p1, const Point &p2) -> bool {
-                    return compareLightness(p1, p2);
-                });
-        }
-        else if (funcType == "value")
-        {
-            #pragma omp parallel for
-            for (int i = 0; i < sortedPath.size(); ++i)
-                std::stable_sort(sortedPath[i].begin(), sortedPath[i].end(), [this](const Point &p1, const Point &p2) -> bool {
-                    return compareValue(p1, p2);
-                });
-        }
-        else if (funcType == "saturation")
-        {
-            #pragma omp parallel for
-            for (int i = 0; i < sortedPath.size(); ++i)
-                std::stable_sort(sortedPath[i].begin(), sortedPath[i].end(), [this](const Point &p1, const Point &p2) -> bool {
-                    return compareSaturation(p1, p2);
-                });
-        }
-        else if (funcType == "hue")
-        {
-            #pragma omp parallel for
-            for (int i = 0; i < sortedPath.size(); ++i)
-                std::stable_sort(sortedPath[i].begin(), sortedPath[i].end(), [this](const Point &p1, const Point &p2) -> bool {
-                    return compareHue(p1, p2);
-                });
-        }
-        else
-        {
-            throw std::runtime_error("No funcType");
-        }
+        #pragma omp parallel for
+        for (int i = 0; i < sortedPath.size(); ++i)
+            std::sort(sortedPath[i].begin(), sortedPath[i].end(), cmp);
     }
     else
     {
-        if (funcType == "lightness")
-            concurrency::parallel_radixsort(sortedPath[0].begin(), sortedPath[0].end(), [this](const Point p) -> int {
-                QColor c = image.pixelColor(p.j, p.i);
-                return c.red() + c.green() + c.blue();
-            });
-        else if (funcType == "value")
-            concurrency::parallel_radixsort(sortedPath[0].begin(), sortedPath[0].end(), [this](const Point p) -> int {
-                return image.pixelColor(p.j, p.i).value();
-            });
-        else if (funcType == "saturation")
-            concurrency::parallel_radixsort(sortedPath[0].begin(), sortedPath[0].end(), [this](const Point p) -> int {
-                return image.pixelColor(p.j, p.i).saturation();
-            });
-        else if (funcType == "hue")
-            concurrency::parallel_radixsort(sortedPath[0].begin(), sortedPath[0].end(), [this](const Point p) -> int {
-                return image.pixelColor(p.j, p.i).hue();
-            });
-        else
-            throw std::runtime_error("No funcType");
+        concurrency::parallel_buffered_sort(sortedPath[0].begin(), sortedPath[0].end(), cmp);
     }
 
     if (toReverse)
@@ -155,6 +106,11 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
         }
 
     return sortedImage;
+}
+
+QColor Sorter::pixelAt(int i, int j)
+{
+    return image.pixelColor(j, i);
 }
 
 std::vector<std::vector<Point>> Sorter::rows()
@@ -597,4 +553,48 @@ void Sorter::applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold,
     }
 
     path = out;
+}
+
+Comparator::Comparator(Sorter *s, QString funcTypes[3]) : sorter(s)
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (funcTypes[i] == "lightness")
+            funcs[i] = [](const QColor &c1, const QColor &c2){
+                return (c1.red() + c1.green() + c1.blue()) - (c2.red() + c2.green() + c2.blue());
+            };
+        else if (funcTypes[i] == "hue")
+            funcs[i] = [](const QColor &c1, const QColor &c2){
+                return c1.hue() - c2.hue();
+            };
+        else if (funcTypes[i] == "saturation")
+            funcs[i] = [](const QColor &c1, const QColor &c2){
+                return c1.saturation() - c2.saturation();
+            };
+        else if (funcTypes[i] == "value")
+            funcs[i] = [](const QColor &c1, const QColor &c2){
+                return c1.value() - c2.value();
+            };
+        else
+            throw std::runtime_error("Incorrect sort func type");
+    }
+
+}
+
+bool Comparator::operator()(const Point &p1, const Point &p2) const
+{
+    QColor c1 = sorter->pixelAt(p1.i, p1.j);
+    QColor c2 = sorter->pixelAt(p2.i, p2.j);
+
+    for (auto func : funcs)
+    {
+        int res = func(c1, c2);
+
+        if (res == 0)
+            continue;
+
+        return res < 0;
+    }
+
+    return false;
 }

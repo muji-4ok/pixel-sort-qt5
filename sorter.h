@@ -41,6 +41,7 @@ public:
     QImage sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                 int angle, bool toMerge, bool toReverse, bool toMirror,
                 bool toInterval, int lowThreshold, QString funcType, bool toEdge);
+    QColor pixelAt(int i, int j);
 
 private:
     int width;
@@ -65,6 +66,17 @@ private:
 
     cv::Mat getEdges(int lowThreshold, int highThreshold, int kernelSize);
     void applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold, int highThreshold, int kernelSize);
+};
+
+class Comparator
+{
+public:
+    Comparator(Sorter *s, QString funcTypes[3]);
+    bool operator() (const Point& p1, const Point&p2) const;
+
+private:
+    Sorter *sorter;
+    std::function<int(const QColor&, const QColor&)> funcs[3];
 };
 
 #endif // SORTER_H
