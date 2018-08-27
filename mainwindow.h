@@ -54,6 +54,8 @@ private slots:
 
     void on_actionReset_zoom_triggered();
 
+    void on_actionSort_after_changing_options_2_toggled(bool arg1);
+
 protected:
     virtual void closeEvent(QCloseEvent *) override;
 
@@ -65,6 +67,7 @@ private:
     QString lastSavedFilename;
     QString lastOpenedFilename;
     bool canClose = true;
+    bool sortAfterChange = true;
 
     void enableInterface();
     void disableInterface();

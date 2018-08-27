@@ -138,6 +138,9 @@ void MainWindow::on_optionsButton_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         options = dialog.getOptions();
+
+        if (sortAfterChange)
+            ui->sortButton->click();
     }
 }
 
@@ -275,4 +278,9 @@ void MainWindow::on_actionZoom_out_triggered()
 void MainWindow::on_actionReset_zoom_triggered()
 {
     ui->imageLabel->resetScroll();
+}
+
+void MainWindow::on_actionSort_after_changing_options_2_toggled(bool arg1)
+{
+    sortAfterChange = arg1;
 }

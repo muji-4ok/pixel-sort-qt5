@@ -68,3 +68,15 @@ QMAKE_CXXFLAGS += /openmp
 
 RESOURCES += \
     res/images.qrc
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Libraries/opencv/opencv_vc14_x32/install/x86/vc15/lib/ -lopencv_core342
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Libraries/opencv/opencv_vc14_x32/install/x86/vc15/lib/ -lopencv_core342d
+
+INCLUDEPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
+DEPENDPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Libraries/opencv/opencv_vc14_x32/install/x86/vc15/lib/ -lopencv_imgproc342
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Libraries/opencv/opencv_vc14_x32/install/x86/vc15/lib/ -lopencv_imgproc342d
+
+INCLUDEPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
+DEPENDPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
