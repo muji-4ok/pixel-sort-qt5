@@ -56,6 +56,26 @@ void MainWindow::on_actionOpen_triggered()
     thread->start();
 }
 
+void MainWindow::handleOpenResults(QImage openedImage)
+{
+    if (openedImage.isNull())
+    {
+        ui->statusBar->showMessage("Failed to open " + lastOpenedFilename);
+        canClose = true;
+        enableInterface();
+        return;
+    }
+
+    options.mask = QImage();
+    sourceImage = openedImage;
+    displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
+    ui->imageWidget->setImage(displayImage);
+
+    canClose = true;
+    enableInterface();
+    ui->statusBar->showMessage("Opened " + lastOpenedFilename);
+}
+
 void MainWindow::on_sortButton_clicked()
 {
     if (sourceImage.isNull())
@@ -79,56 +99,6 @@ void MainWindow::handleSortResults(QImage result)
 
     displayImage = result;
     ui->imageWidget->setImage(displayImage);
-}
-
-void MainWindow::handleOpenResults(QImage openedImage)
-{
-    if (openedImage.isNull())
-    {
-        ui->statusBar->showMessage("Failed to open " + lastOpenedFilename);
-        canClose = true;
-        enableInterface();
-        return;
-    }
-
-    options.mask = QImage();
-    sourceImage = openedImage;
-    displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
-    ui->imageWidget->setImage(displayImage);
-
-    canClose = true;
-    enableInterface();
-    ui->statusBar->showMessage("Opened " + lastOpenedFilename);
-}
-
-void MainWindow::handleSaveResults()
-{
-    canClose = true;
-    enableInterface();
-    ui->statusBar->showMessage("Saved " + lastSavedFilename);
-}
-
-void MainWindow::changePixelInfo(const QColor &c)
-{
-    QString infoType = ui->pixelInfoComboBox->currentText();
-
-    ui->pixelInfoColorLabel->setStyleSheet("QLabel { background-color : rgb(" +
-                                           QString::number(c.red()) + "," +
-                                           QString::number(c.green()) + "," +
-                                           QString::number(c.blue()) + "); border: 2px solid black }");
-
-    if (infoType == "RGB")
-    {
-        ui->pixelInfoLineEdit->setText(QString::number(c.red()) + " " + QString::number(c.green()) + " " + QString::number(c.blue()));
-    }
-    else if (infoType == "HSV")
-    {
-        ui->pixelInfoLineEdit->setText(QString::number(c.hue() + 1) + " " + QString::number(c.saturation()) + " " + QString::number(c.value()));
-    }
-    else if (infoType == "lightness")
-    {
-        ui->pixelInfoLineEdit->setText(QString::number(c.red() + c.green() + c.blue()));
-    }
 }
 
 void MainWindow::on_optionsButton_clicked()
@@ -188,6 +158,13 @@ void MainWindow::on_actionSave_as_triggered()
     saveImage(filename);
 }
 
+void MainWindow::handleSaveResults()
+{
+    canClose = true;
+    enableInterface();
+    ui->statusBar->showMessage("Saved " + lastSavedFilename);
+}
+
 void MainWindow::on_actionSave_triggered()
 {
     if (lastSavedFilename.isNull())
@@ -201,12 +178,12 @@ void MainWindow::on_actionSave_triggered()
 
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::saveImage(QString filename)
 {
-    if (canClose)
-        QMainWindow::closeEvent(event);
-    else
-        event->ignore();
+    SaveThread *thread = new SaveThread(this, displayImage, filename);
+    connect(thread, &SaveThread::resultReady, this, &MainWindow::handleSaveResults);
+    connect(thread, &SaveThread::finished, thread, &QObject::deleteLater);
+    thread->start();
 }
 
 void MainWindow::enableInterface()
@@ -231,12 +208,12 @@ void MainWindow::disableInterface()
     ui->pixelInfoComboBox->setEnabled(false);
 }
 
-void MainWindow::saveImage(QString filename)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-    SaveThread *thread = new SaveThread(this, displayImage, filename);
-    connect(thread, &SaveThread::resultReady, this, &MainWindow::handleSaveResults);
-    connect(thread, &SaveThread::finished, thread, &QObject::deleteLater);
-    thread->start();
+    if (canClose)
+        QMainWindow::closeEvent(event);
+    else
+        event->ignore();
 }
 
 void MainWindow::on_actionCopy_triggered()
@@ -270,12 +247,12 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionZoom_in_triggered()
 {
-    ui->imageWidget->scrollImage(1);
+    ui->imageWidget->scrollImage(ImageWidget::Scroll_UP);
 }
 
 void MainWindow::on_actionZoom_out_triggered()
 {
-    ui->imageWidget->scrollImage(-1);
+    ui->imageWidget->scrollImage(ImageWidget::Scroll_DOWN);
 }
 
 void MainWindow::on_actionReset_zoom_triggered()
@@ -286,4 +263,27 @@ void MainWindow::on_actionReset_zoom_triggered()
 void MainWindow::on_actionSort_after_changing_options_2_toggled(bool arg1)
 {
     sortAfterChange = arg1;
+}
+
+void MainWindow::changePixelInfo(const QColor &c)
+{
+    QString infoType = ui->pixelInfoComboBox->currentText();
+
+    ui->pixelInfoColorLabel->setStyleSheet("QLabel { background-color : rgb(" +
+                                           QString::number(c.red()) + "," +
+                                           QString::number(c.green()) + "," +
+                                           QString::number(c.blue()) + "); border: 2px solid black }");
+
+    if (infoType == "RGB")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.red()) + " " + QString::number(c.green()) + " " + QString::number(c.blue()));
+    }
+    else if (infoType == "HSV")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.hue() + 1) + " " + QString::number(c.saturation()) + " " + QString::number(c.value()));
+    }
+    else if (infoType == "lightness")
+    {
+        ui->pixelInfoLineEdit->setText(QString::number(c.red() + c.green() + c.blue()));
+    }
 }

@@ -2,41 +2,6 @@
 
 Point::Point(unsigned short int i, unsigned short int j) : i(i), j(j) {}
 
-bool Sorter::compareLightness(const Point &p1, const Point &p2)
-{
-    QColor c1 = image.pixelColor(p1.j, p1.i);
-    QColor c2 = image.pixelColor(p2.j, p2.i);
-
-    int lightness1 = c1.red() + c1.green() + c1.blue();
-    int lightness2 = c2.red() + c2.green() + c2.blue();
-
-    return lightness1 < lightness2;
-}
-
-bool Sorter::compareHue(const Point &p1, const Point &p2)
-{
-    QColor c1 = image.pixelColor(p1.j, p1.i);
-    QColor c2 = image.pixelColor(p2.j, p2.i);
-
-    return c1.hue() < c2.hue();
-}
-
-bool Sorter::compareSaturation(const Point &p1, const Point &p2)
-{
-    QColor c1 = image.pixelColor(p1.j, p1.i);
-    QColor c2 = image.pixelColor(p2.j, p2.i);
-
-    return c1.saturation() < c2.saturation();
-}
-
-bool Sorter::compareValue(const Point &p1, const Point &p2)
-{
-    QColor c1 = image.pixelColor(p1.j, p1.i);
-    QColor c2 = image.pixelColor(p2.j, p2.i);
-
-    return c1.value() < c2.value();
-}
-
 Sorter::Sorter(const QImage &img) : image(img)
 {
     width = image.width();

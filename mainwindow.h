@@ -33,25 +33,18 @@ public slots:
 
 private slots:
     void on_actionOpen_triggered();
-
-    void on_sortButton_clicked();
-
-    void on_optionsButton_clicked();
-
+    void on_actionSave_triggered();
+    void on_actionSave_as_triggered();
     void on_actionReset_triggered();
 
-    void on_actionSave_as_triggered();
-
-    void on_actionSave_triggered();
+    void on_sortButton_clicked();
+    void on_optionsButton_clicked();
 
     void on_actionCopy_triggered();
-
     void on_actionPaste_triggered();
 
     void on_actionZoom_in_triggered();
-
     void on_actionZoom_out_triggered();
-
     void on_actionReset_zoom_triggered();
 
     void on_actionSort_after_changing_options_2_toggled(bool arg1);

@@ -5,24 +5,41 @@
 #include <QColor>
 #include <QImage>
 
+template <typename T>
+T clamp(T minVal, T maxVal, T val)
+{
+    return std::min(maxVal, std::max(minVal, val));
+}
+
+template <typename T>
+bool isInRange(T minVal, T maxVal, T val)
+{
+    return minVal <= val && val < maxVal;
+}
+
 ImageWidget::ImageWidget(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-void ImageWidget::scrollImage(int dir)
+void ImageWidget::scrollImage(ScrollDirection dir)
 {
     if (pixmap.isNull())
         return;
 
     double diff = 0.05 * std::pow(1.5, scale);
 
-    if (dir > 0)
+    switch (dir)
+    {
+    case Scroll_UP:
         scale += diff;
-    else
+        break;
+    case Scroll_DOWN:
         scale -= diff;
+        break;
+    }
 
-    scale = std::min(maxScale, std::max(minScale, scale));
+    scale = clamp(minScale, maxScale, scale);
 
     repaint();
 }
@@ -79,7 +96,7 @@ void ImageWidget::resizeEvent(QResizeEvent *)
 void ImageWidget::wheelEvent(QWheelEvent *event)
 {
     QPoint degrees = event->angleDelta();
-    scrollImage(degrees.y());
+    scrollImage(degrees.y() > 0 ? Scroll_UP : Scroll_DOWN);
 
     QPoint localMousePos = mapFromGlobal(QCursor::pos());
     capturePixelUnderMouse(localMousePos.x(), localMousePos.y());
@@ -114,8 +131,7 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *)
 {
-//    if (image.isNull())
-//        return;
+
 }
 
 void ImageWidget::paintEvent(QPaintEvent *)
@@ -163,10 +179,12 @@ void ImageWidget::paintEvent(QPaintEvent *)
 
 void ImageWidget::clampCenter()
 {
-    center_x = std::min(pixmap.width() - width() / 2 / scale,
-                        std::max(width() / 2 / scale, center_x));
-    center_y = std::min(pixmap.height() - height() / 2 / scale,
-                        std::max(height() / 2 / scale, center_y));
+    center_x = clamp(width() / 2 / scale,
+                     pixmap.width() - width() / 2 / scale,
+                     center_x);
+    center_y = clamp(height() / 2 / scale,
+                     pixmap.height() - height() / 2 / scale,
+                     center_y);
 }
 
 void ImageWidget::capturePixelUnderMouse(int event_x, int event_y)
@@ -187,8 +205,11 @@ void ImageWidget::capturePixelUnderMouse(int event_x, int event_y)
         int x = event_x / scale + left;
         int y = event_y / scale + top;
 
-        if (0 <= x && x < pixmap.width() && 0 <= y && y < pixmap.height() &&
-            0 <= event_x && event_x < width() && 0 <= event_y && event_y < height())
+
+//        if (0 <= x && x < pixmap.width() && 0 <= y && y < pixmap.height() &&
+//            0 <= event_x && event_x < width() && 0 <= event_y && event_y < height())
+        if (isInRange(0, pixmap.width(), x) && isInRange(0, pixmap.height(), y) &&
+            isInRange(0, width(), event_x) && isInRange(0, height(), event_y))
         {
             QPixmap widgetView = grab();
             QImage im = widgetView.toImage();

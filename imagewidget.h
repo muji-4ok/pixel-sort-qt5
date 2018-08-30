@@ -12,9 +12,16 @@
 class ImageWidget : public QWidget
 {
     Q_OBJECT
+
 public:
+    enum ScrollDirection
+    {
+        Scroll_UP,
+        Scroll_DOWN
+    };
+
     explicit ImageWidget(QWidget *parent = nullptr);
-    void scrollImage(int dir);
+    void scrollImage(ScrollDirection dir);
     void resetScroll();
 
 signals:

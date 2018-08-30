@@ -49,11 +49,6 @@ private:
     int height;
     const QImage image;
 
-    bool compareLightness(const Point &p1, const Point &p2);
-    bool compareHue(const Point &p1, const Point &p2);
-    bool compareSaturation(const Point &p1, const Point &p2);
-    bool compareValue(const Point &p1, const Point &p2);
-
     std::vector<std::vector<Point>> rows();
     std::vector<std::vector<Point>> columns();
     std::vector<std::vector<Point>> rectangles();
@@ -78,7 +73,7 @@ public:
 
 private:
     Sorter *sorter;
-    std::vector< std::function< int(const QColor&, const QColor&) > > funcs{};
+    std::vector<std::function<int(const QColor&, const QColor&)>> funcs{};
 };
 
 #endif // SORTER_H
