@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!settings.contains("lastDirectory"))
         settings.setValue("lastDirectory", ".");
 
-    connect(ui->actionQualityZoomCheckBox, &QAction::toggled, ui->imageLabel, &ImageLabel::setQualityZoom);
-    connect(ui->imageLabel, &ImageLabel::changeRgbInfoMessage, ui->pixelInfoLineEdit, &QLineEdit::setText);
-    connect(ui->imageLabel, &ImageLabel::changeRgbInfo, this, &MainWindow::changePixelInfo);
+    connect(ui->actionQualityZoomCheckBox, &QAction::toggled, ui->imageWidget, &ImageWidget::setQualityZoom);
+    connect(ui->imageWidget, &ImageWidget::changeRgbInfoMessage, ui->pixelInfoLineEdit, &QLineEdit::setText);
+    connect(ui->imageWidget, &ImageWidget::changeRgbInfo, this, &MainWindow::changePixelInfo);
 }
 
 MainWindow::~MainWindow()
@@ -78,7 +78,7 @@ void MainWindow::handleSortResults(QImage result)
     ui->statusBar->showMessage("Sort complete");
 
     displayImage = result;
-    ui->imageLabel->setImage(displayImage);
+    ui->imageWidget->setImage(displayImage);
 }
 
 void MainWindow::handleOpenResults(QImage openedImage)
@@ -91,9 +91,10 @@ void MainWindow::handleOpenResults(QImage openedImage)
         return;
     }
 
+    options.mask = QImage();
     sourceImage = openedImage;
     displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
-    ui->imageLabel->setImage(displayImage);
+    ui->imageWidget->setImage(displayImage);
 
     canClose = true;
     enableInterface();
@@ -132,7 +133,7 @@ void MainWindow::changePixelInfo(const QColor &c)
 
 void MainWindow::on_optionsButton_clicked()
 {
-    OptionsDialog dialog(this);
+    OptionsDialog dialog(this, lastOptionsTab, sourceImage.size());
     dialog.setOptions(options);
 
     if (dialog.exec() == QDialog::Accepted)
@@ -142,6 +143,8 @@ void MainWindow::on_optionsButton_clicked()
         if (sortAfterChange)
             ui->sortButton->click();
     }
+
+    lastOptionsTab = dialog.getLastOptionsTab();
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -154,7 +157,7 @@ void MainWindow::on_actionReset_triggered()
 
     displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
 
-    ui->imageLabel->setImage(displayImage);
+    ui->imageWidget->setImage(displayImage);
     ui->statusBar->showMessage("Image reset");
 }
 
@@ -212,7 +215,7 @@ void MainWindow::enableInterface()
     ui->menuBar->setEnabled(true);
     ui->sortButton->setEnabled(true);
     ui->optionsButton->setEnabled(true);
-    ui->imageLabel->setEnabled(true);
+    ui->imageWidget->setEnabled(true);
     ui->pixelInfoLineEdit->setEnabled(true);
     ui->pixelInfoComboBox->setEnabled(true);
 }
@@ -223,7 +226,7 @@ void MainWindow::disableInterface()
     ui->menuBar->setEnabled(false);
     ui->sortButton->setEnabled(false);
     ui->optionsButton->setEnabled(false);
-    ui->imageLabel->setEnabled(false);
+    ui->imageWidget->setEnabled(false);
     ui->pixelInfoLineEdit->setEnabled(false);
     ui->pixelInfoComboBox->setEnabled(false);
 }
@@ -259,7 +262,7 @@ void MainWindow::on_actionPaste_triggered()
             {
                 sourceImage = image;
                 displayImage = sourceImage;
-                ui->imageLabel->setImage(displayImage);
+                ui->imageWidget->setImage(displayImage);
             }
         }
     }
@@ -267,17 +270,17 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionZoom_in_triggered()
 {
-    ui->imageLabel->scrollImage(1);
+    ui->imageWidget->scrollImage(1);
 }
 
 void MainWindow::on_actionZoom_out_triggered()
 {
-    ui->imageLabel->scrollImage(-1);
+    ui->imageWidget->scrollImage(-1);
 }
 
 void MainWindow::on_actionReset_zoom_triggered()
 {
-    ui->imageLabel->resetScroll();
+    ui->imageWidget->resetScroll();
 }
 
 void MainWindow::on_actionSort_after_changing_options_2_toggled(bool arg1)

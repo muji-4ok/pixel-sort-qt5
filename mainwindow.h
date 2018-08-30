@@ -68,6 +68,7 @@ private:
     QString lastOpenedFilename;
     bool canClose = true;
     bool sortAfterChange = true;
+    int lastOptionsTab = 0;
 
     void enableInterface();
     void disableInterface();

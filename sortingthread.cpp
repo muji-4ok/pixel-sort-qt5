@@ -14,7 +14,7 @@ void SortingThread::run()
     Sorter sorter(inputImage);
     QImage outImage = sorter.sort(options.pathType, options.maxIntervals, options.randomizeIntervals, options.angle, options.toMerge,
                                   options.toReverse, options.toMirror, options.toInterval, options.lowThreshold, options.funcs,
-                                  options.toEdge);
+                                  options.toEdge, options.toMask, options.mask, options.invertMask);
 
     emit resultReady(outImage);
 }

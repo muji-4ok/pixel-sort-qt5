@@ -33,7 +33,8 @@ SOURCES += \
     openthread.cpp \
     savethread.cpp \
     avaliablefunclistwidget.cpp \
-    orderfunclistwidget.cpp
+    orderfunclistwidget.cpp \
+    imagewidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS += \
     openthread.h \
     savethread.h \
     avaliablefunclistwidget.h \
-    orderfunclistwidget.h
+    orderfunclistwidget.h \
+    imagewidget.h
 
 FORMS += \
         mainwindow.ui \

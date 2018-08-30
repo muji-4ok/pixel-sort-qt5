@@ -1,18 +1,18 @@
-#include "imagelabel.h"
+#include "imagewidget.h"
 #include <QDebug>
 #include <QCursor>
 #include <QPainter>
 #include <QColor>
 #include <QImage>
 
-ImageLabel::ImageLabel(QWidget *parent) : QLabel(parent)
+ImageWidget::ImageWidget(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-void ImageLabel::scrollImage(int dir)
+void ImageWidget::scrollImage(int dir)
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
     double diff = 0.05 * std::pow(1.5, scale);
@@ -27,9 +27,9 @@ void ImageLabel::scrollImage(int dir)
     repaint();
 }
 
-void ImageLabel::resetScroll()
+void ImageWidget::resetScroll()
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
     scale = minScale;
@@ -37,46 +37,46 @@ void ImageLabel::resetScroll()
     repaint();
 }
 
-void ImageLabel::setImage(QImage newImage)
+void ImageWidget::setImage(QImage newImage)
 {
-    image = QPixmap::fromImage(newImage);
+    pixmap = QPixmap::fromImage(newImage);
 
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
-    center_x = image.width() / 2;
-    center_y = image.height() / 2;
-    int maxW = std::min(image.width(), width());
-    int maxH = std::min(image.height(), height());
-    minScale = std::min(static_cast<double>(maxW) / image.width(), static_cast<double>(maxH) / image.height());
-    maxScale = std::log2(std::min(image.width(), image.height()));
+    center_x = pixmap.width() / 2;
+    center_y = pixmap.height() / 2;
+    int maxW = std::min(pixmap.width(), width());
+    int maxH = std::min(pixmap.height(), height());
+    minScale = std::min(static_cast<double>(maxW) / pixmap.width(), static_cast<double>(maxH) / pixmap.height());
+    maxScale = std::log2(std::min(pixmap.width(), pixmap.height()));
     scale = minScale;
 
     repaint();
 }
 
-void ImageLabel::setQualityZoom(bool checked)
+void ImageWidget::setQualityZoom(bool checked)
 {
     qualityZoom = checked;
 
     repaint();
 }
 
-void ImageLabel::resizeEvent(QResizeEvent *)
+void ImageWidget::resizeEvent(QResizeEvent *)
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
-    int maxW = std::min(image.width(), width());
-    int maxH = std::min(image.height(), height());
-    minScale = std::min(static_cast<double>(maxW) / image.width(), static_cast<double>(maxH) / image.height());
-    maxScale = std::log2(std::min(image.width(), image.height()));
+    int maxW = std::min(pixmap.width(), width());
+    int maxH = std::min(pixmap.height(), height());
+    minScale = std::min(static_cast<double>(maxW) / pixmap.width(), static_cast<double>(maxH) / pixmap.height());
+    maxScale = std::log2(std::min(pixmap.width(), pixmap.height()));
     scale = std::min(maxScale, std::max(minScale, scale));
 
     repaint();
 }
 
-void ImageLabel::wheelEvent(QWheelEvent *event)
+void ImageWidget::wheelEvent(QWheelEvent *event)
 {
     QPoint degrees = event->angleDelta();
     scrollImage(degrees.y());
@@ -85,19 +85,17 @@ void ImageLabel::wheelEvent(QWheelEvent *event)
     capturePixelUnderMouse(localMousePos.x(), localMousePos.y());
 }
 
-void ImageLabel::mousePressEvent(QMouseEvent *event)
+void ImageWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
-
-//    setCursor(Qt::ClosedHandCursor);
 
     lastMousePos = event->pos();
 }
 
-void ImageLabel::mouseMoveEvent(QMouseEvent *event)
+void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
     if (event->buttons() && Qt::LeftButton)
@@ -105,26 +103,24 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *event)
         QPoint diff = lastMousePos - event->pos();
         lastMousePos = event->pos();
         center_x += diff.x() / scale * 0.9 * std::pow(1.001,
-                                                      static_cast<double>(image.width()) / width());
+                                                      static_cast<double>(pixmap.width()) / width());
         center_y += diff.y() / scale * 0.9 * std::pow(1.001,
-                                                      static_cast<double>(image.height()) / height());
+                                                      static_cast<double>(pixmap.height()) / height());
         repaint();
     }
 
     capturePixelUnderMouse(event->x(), event->y());
 }
 
-void ImageLabel::mouseReleaseEvent(QMouseEvent *)
+void ImageWidget::mouseReleaseEvent(QMouseEvent *)
 {
-    if (image.isNull())
-        return;
-
-//    setCursor(Qt::OpenHandCursor);
+//    if (image.isNull())
+//        return;
 }
 
-void ImageLabel::paintEvent(QPaintEvent *)
+void ImageWidget::paintEvent(QPaintEvent *)
 {
-    if (image.isNull())
+    if (pixmap.isNull())
         return;
 
     clampCenter();
@@ -155,25 +151,25 @@ void ImageLabel::paintEvent(QPaintEvent *)
     if (scale < 1 && qualityZoom)
     {
         p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        QPixmap scaledImage = image.copy(frame).scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QPixmap scaledImage = pixmap.copy(frame).scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         p.drawPixmap(drawOffX, drawOffY, scaledImage);
     }
     else
     {
         p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-        p.drawPixmap(QRect(drawOffX, drawOffY, width(), height()), image, frame);
+        p.drawPixmap(QRect(drawOffX, drawOffY, width(), height()), pixmap, frame);
     }
 }
 
-void ImageLabel::clampCenter()
+void ImageWidget::clampCenter()
 {
-    center_x = std::min(image.width() - width() / 2 / scale,
+    center_x = std::min(pixmap.width() - width() / 2 / scale,
                         std::max(width() / 2 / scale, center_x));
-    center_y = std::min(image.height() - height() / 2 / scale,
+    center_y = std::min(pixmap.height() - height() / 2 / scale,
                         std::max(height() / 2 / scale, center_y));
 }
 
-void ImageLabel::capturePixelUnderMouse(int event_x, int event_y)
+void ImageWidget::capturePixelUnderMouse(int event_x, int event_y)
 {
     clampCenter();
 
@@ -191,9 +187,9 @@ void ImageLabel::capturePixelUnderMouse(int event_x, int event_y)
         int x = event_x / scale + left;
         int y = event_y / scale + top;
 
-        if (0 <= x && x < image.width() && 0 <= y && y < image.height())
+        if (0 <= x && x < pixmap.width() && 0 <= y && y < pixmap.height())
         {
-            QImage im = image.toImage();
+            QImage im = pixmap.toImage();
             QColor c = im.pixelColor(x, y);
 
             emit changeRgbInfo(c);

@@ -40,7 +40,8 @@ public:
     Sorter(const QImage &img);
     QImage sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                 int angle, bool toMerge, bool toReverse, bool toMirror,
-                bool toInterval, int lowThreshold, std::vector<QString> funcs, bool toEdge);
+                bool toInterval, int lowThreshold, std::vector<QString> funcs,
+                bool toEdge, bool toMask, const QImage &mask, bool invertMask);
     QColor pixelAt(int i, int j);
 
 private:
@@ -66,6 +67,7 @@ private:
 
     cv::Mat getEdges(int lowThreshold, int highThreshold, int kernelSize);
     void applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold, int highThreshold, int kernelSize);
+    void applyMask(std::vector<std::vector<Point>> &path, const QImage &mask, bool invert);
 };
 
 class Comparator

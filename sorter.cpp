@@ -46,7 +46,8 @@ Sorter::Sorter(const QImage &img) : image(img)
 
 QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                     int angle, bool toMerge, bool toReverse, bool toMirror,
-                    bool toInterval, int lowThreshold, std::vector<QString> funcs, bool toEdge)
+                    bool toInterval, int lowThreshold, std::vector<QString> funcs,
+                    bool toEdge, bool toMask, const QImage &mask, bool invertMask)
 {
     std::vector<std::vector<Point>> path;
     std::vector<std::vector<Point>> sortedPath;
@@ -66,6 +67,8 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
 
     if (toEdge)
         applyEdges(path, lowThreshold, lowThreshold * 3, 3);
+    else if (toMask && !mask.isNull())
+        applyMask(path, mask, invertMask);
 
     if (toMerge)
         mergeIntoOne(path);
@@ -543,6 +546,41 @@ void Sorter::applyEdges(std::vector<std::vector<Point>> &path, int lowThreshold,
             }
 
             wasEdge = edge;
+        }
+
+        if (segment.size() > 0)
+            out.push_back(segment);
+    }
+
+    path = out;
+}
+
+void Sorter::applyMask(std::vector<std::vector<Point> > &path, const QImage &mask, bool invert)
+{
+    std::vector<std::vector<Point>> out{};
+
+    for (int i = 0; i < path.size(); ++i)
+    {
+        bool wasSkipped= false;
+        std::vector<Point> segment{};
+
+        for (int j = 0; j < path[i].size(); ++j)
+        {
+            bool skip = mask.pixelColor(path[i][j].j, path[i][j].i) != QColor(0, 0, 0);
+
+            if (invert)
+                skip = !skip;
+
+            if (!skip)
+                segment.push_back(path[i][j]);
+
+            if (skip && !wasSkipped)
+            {
+                out.push_back(segment);
+                segment = {};
+            }
+
+            wasSkipped = skip;
         }
 
         if (segment.size() > 0)

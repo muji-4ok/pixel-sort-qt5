@@ -1,12 +1,17 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
+#include "openthread.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QSettings>
 
-OptionsDialog::OptionsDialog(QWidget *parent) :
-    QDialog(parent),
+OptionsDialog::OptionsDialog(QWidget *parent, int lastTab, QSize sourceSize) :
+    QDialog(parent), sourceSize(sourceSize),
     ui(new Ui::OptionsDialog)
 {
     ui->setupUi(this);
+    ui->tabWidget->setCurrentIndex(lastTab);
 
     connect(ui->angleSlider, &QSlider::valueChanged, ui->angleSpinBox, &QSpinBox::setValue);
     connect(ui->angleSpinBox, SIGNAL(valueChanged(int)), ui->angleSlider, SLOT(setValue(int)));
@@ -20,6 +25,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     on_pathComboBox_currentTextChanged(ui->pathComboBox->currentText());
     on_doIntervalsCheckBox_stateChanged(ui->doIntervalsCheckBox->isChecked());
     on_doEdgesCheckBox_stateChanged(ui->doEdgesCheckBox->isChecked());
+    on_doMaskCheckBox_stateChanged(ui->doMaskCheckBox->isChecked());
 }
 
 OptionsDialog::~OptionsDialog()
@@ -32,7 +38,7 @@ Options OptionsDialog::getOptions()
     Options options(ui->pathComboBox->currentText(), ui->intervalSlider->value(), ui->randomizeCheckBox->isChecked(),
                     ui->angleSlider->value(), ui->mergeCheckBox->isChecked(), ui->reverseCheckBox->isChecked(), ui->mirrorCheckBox->isChecked(),
                     ui->doIntervalsCheckBox->isChecked(), ui->thresholdSlider->value(), ui->orderFuncListWidget->getOrder(),
-                    ui->doEdgesCheckBox->isChecked());
+                    ui->doEdgesCheckBox->isChecked(), ui->doMaskCheckBox->isChecked(), mask, ui->skipBlackRadioButton->isChecked());
     return options;
 }
 
@@ -49,6 +55,38 @@ void OptionsDialog::setOptions(Options &options)
     ui->thresholdSlider->setValue(options.lowThreshold);
     ui->orderFuncListWidget->setOrder(options.funcs);
     ui->doEdgesCheckBox->setChecked(options.toEdge);
+    ui->doMaskCheckBox->setChecked(options.toMask);
+    mask = options.mask;
+
+    if (!mask.isNull())
+    {
+        QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->maskLabel->setPixmap(pix);
+    }
+
+    ui->skipBlackRadioButton->setChecked(options.invertMask);
+}
+
+int OptionsDialog::getLastOptionsTab()
+{
+    return ui->tabWidget->currentIndex();
+}
+
+void OptionsDialog::handleMaskOpenResults(QImage openedImage)
+{
+    if (openedImage.isNull() || openedImage.size() != sourceSize)
+    {
+        canClose = true;
+        enableInterface();
+        return;
+    }
+
+    mask = openedImage.convertToFormat(QImage::Format_Mono);
+    QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    ui->maskLabel->setPixmap(pix);
+
+    canClose = true;
+    enableInterface();
 }
 
 void OptionsDialog::on_pathComboBox_currentTextChanged(const QString &arg1)
@@ -87,6 +125,7 @@ void OptionsDialog::on_doEdgesCheckBox_stateChanged(int arg1)
     {
         ui->thresholdSlider->setEnabled(true);
         ui->thresholdSpinBox->setEnabled(true);
+        ui->doMaskCheckBox->setChecked(false);
     }
     else if (arg1 == Qt::Unchecked)
     {
@@ -96,4 +135,63 @@ void OptionsDialog::on_doEdgesCheckBox_stateChanged(int arg1)
     else
         std::runtime_error("Checkbox cannot be partially checked");
 
+}
+
+void OptionsDialog::on_doMaskCheckBox_stateChanged(int arg1)
+{
+    if (arg1 == Qt::Checked)
+    {
+        ui->loadMaskPushButton->setEnabled(true);
+        ui->doEdgesCheckBox->setChecked(false);
+    }
+    else if (arg1 == Qt::Unchecked)
+    {
+        ui->loadMaskPushButton->setEnabled(false);
+    }
+    else
+        std::runtime_error("Checkbox cannot be partially checked");
+}
+
+void OptionsDialog::on_loadMaskPushButton_clicked()
+{
+    QSettings settings("EgorCO", "Pixel Sorter");
+
+    QString filename = QFileDialog::getOpenFileName(this, "Open mask", settings.value("lastDirectory").toString(),
+                                                    QString("Image Files (*.png *.jpg *.jpeg *.bmp *.gif *.pbm *.pgm *.ppm *.xbm *.xpm);;") +
+                                                    "PNG (*.png);;" +
+                                                    "JPEG (*.jpg *.jpeg);;" +
+                                                    "GIF (*.gif);;" +
+                                                    "Bitmap (*.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
+
+    if (filename.isNull())
+        return;
+
+    QFileInfo fileInfo(filename);
+    settings.setValue("lastDirectory", fileInfo.dir().absolutePath());
+
+    canClose = false;
+    disableInterface();
+
+    OpenThread *thread = new OpenThread(this, filename);
+    connect(thread, &OpenThread::resultReady, this, &OptionsDialog::handleMaskOpenResults);
+    connect(thread, &OpenThread::finished, thread, &QObject::deleteLater);
+    thread->start();
+}
+
+void OptionsDialog::closeEvent(QCloseEvent *event)
+{
+    if (canClose)
+        QDialog::closeEvent(event);
+    else
+        event->ignore();
+}
+
+void OptionsDialog::disableInterface()
+{
+    setEnabled(false);
+}
+
+void OptionsDialog::enableInterface()
+{
+    setEnabled(true);
 }
