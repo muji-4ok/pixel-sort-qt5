@@ -68,7 +68,7 @@ private:
 class Comparator
 {
 public:
-    Comparator(Sorter *s, std::vector<QString> funcTypes);
+    Comparator(Sorter *s, const std::vector<QString> &funcTypes);
     bool operator() (const Point& p1, const Point&p2) const;
 
 private:

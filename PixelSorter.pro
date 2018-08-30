@@ -81,3 +81,6 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Libraries/opencv/
 
 INCLUDEPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
 DEPENDPATH += $$PWD/../../Libraries/opencv/opencv_vc14_x32/install/include
+
+DISTFILES += \
+    todo.md

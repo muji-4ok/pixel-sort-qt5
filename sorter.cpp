@@ -2,10 +2,8 @@
 
 Point::Point(unsigned short int i, unsigned short int j) : i(i), j(j) {}
 
-Sorter::Sorter(const QImage &img) : image(img)
+Sorter::Sorter(const QImage &img) : image(img), width(img.width()), height(img.height())
 {
-    width = image.width();
-    height = image.height();
     srand(time(nullptr));
 }
 
@@ -71,6 +69,13 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
             Point after = sortedPath[i][j];
             sortedImage.setPixel(before.j, before.i, image.pixel(after.j, after.i));
         }
+
+//    int vSize = 0;
+
+//    for (const auto &seq : path)
+//        vSize += sizeof(seq);
+
+//    qInfo() << path.size() * sizeof(std::vector<Point>) << path.size() << sizeof(std::vector<Point>);
 
     return sortedImage;
 }
@@ -172,15 +177,14 @@ std::vector<std::vector<Point>> Sorter::octagons()
 {
     std::vector<std::vector<Point>> out {};
 
-    int maxRadius = std::round(std::sqrt(std::pow(height / 2.0, 2) + std::pow(width / 2.0, 2)) * 2 / std::sqrt(2));
+    int maxRadius = std::round(std::sqrt(std::pow(height / 2.0, 2) + std::pow(width / 2.0, 2)));
     int i_center = height / 2;
     int j_center = width / 2;
     std::vector<std::vector<bool>> pointsDone(maxRadius, std::vector<bool>(maxRadius));
 
-    for (int radius = 0, row = 0; radius < maxRadius; ++radius, ++row)
+    for (int radius = 0; radius < maxRadius; ++radius)
     {
         std::vector<Point> offsetSegment{};
-        out.emplace_back();
         int i_off = 0;
         int j_off = radius;
 
@@ -211,28 +215,30 @@ std::vector<std::vector<Point>> Sorter::octagons()
                 --j_off;
         }
 
+        out.emplace_back();
+
         for (Point &p : offsetSegment)
             if (insideImage(i_center + p.i, j_center + p.j, width, height))
-                out[row].emplace_back(i_center + p.i, j_center + p.j);
+                out[radius].emplace_back(i_center + p.i, j_center + p.j);
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
-            if (insideImage(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j, width, height))
-                out[row].emplace_back(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j);
+            if (insideImage(i_center + offsetSegment[i].i, j_center - 1 - offsetSegment[i].j, width, height))
+                out[radius].emplace_back(i_center + offsetSegment[i].i, j_center - 1 - offsetSegment[i].j);
 
         for (Point &p : offsetSegment)
-            if (insideImage(i_center - p.i, j_center - p.j, width, height))
-                out[row].emplace_back(i_center - p.i, j_center - p.j);
+            if (insideImage(i_center - 1 - p.i, j_center - 1 - p.j, width, height))
+                out[radius].emplace_back(i_center - 1 - p.i, j_center - 1 - p.j);
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
-            if (insideImage(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j, width, height))
-                out[row].emplace_back(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j);
+            if (insideImage(i_center - 1 - offsetSegment[i].i, j_center + offsetSegment[i].j, width, height))
+                out[radius].emplace_back(i_center - 1 - offsetSegment[i].i, j_center + offsetSegment[i].j);
 
-        if (out[row].size() == 0)
-            continue;
+        if (out[radius].size() == 0)
+            break;
 
-        std::rotate(out[row].begin(),
-                    out[row].begin() + (rand() % out[row].size()),
-                    out[row].end());
+        std::rotate(out[radius].begin(),
+                    out[radius].begin() + (rand() % out[radius].size()),
+                    out[radius].end());
     }
 
     return out;
@@ -402,16 +408,11 @@ void Sorter::mirror(std::vector<std::vector<Point>> &path)
 
         seq.assign(mirrored.begin(), mirrored.end());
     }
-
-    //std::cout << "Mirror done\n";
 }
 
 void Sorter::applyIntervals(std::vector<std::vector<Point>> &path, int maxIntervals, bool randomize)
 {
     std::vector<std::vector<Point>> out{};
-
-    if (maxIntervals < 2)
-        return;
 
     for (auto &seq : path)
     {
@@ -538,7 +539,7 @@ void Sorter::applyMask(std::vector<std::vector<Point> > &path, const QImage &mas
     path = out;
 }
 
-Comparator::Comparator(Sorter *s, std::vector<QString> funcTypes) : sorter(s)
+Comparator::Comparator(Sorter *s, const std::vector<QString> &funcTypes) : sorter(s)
 {
     for (QString funcType : funcTypes)
     {
