@@ -11,7 +11,7 @@ Sorter::Sorter(const QImage &img) : image(img)
 
 QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                     int angle, bool toMerge, bool toReverse, bool toMirror,
-                    bool toInterval, int lowThreshold, std::vector<QString> funcs,
+                    bool toInterval, int lowThreshold, const std::vector<QString> &funcs,
                     bool toEdge, bool toMask, const QImage &mask, bool invertMask)
 {
     std::vector<std::vector<Point>> path;

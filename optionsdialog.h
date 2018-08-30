@@ -9,6 +9,7 @@
 #include <QCloseEvent>
 #include <QImage>
 #include <QPixmap>
+#include <QBitmap>
 #include <vector>
 
 struct Options

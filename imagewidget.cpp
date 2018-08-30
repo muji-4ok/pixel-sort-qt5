@@ -17,7 +17,7 @@ bool isInRange(T minVal, T maxVal, T val)
     return minVal <= val && val < maxVal;
 }
 
-ImageWidget::ImageWidget(QWidget *parent) : QWidget(parent)
+ImageWidget::ImageWidget(QWidget *parent) : QWidget(parent), minScale(0.0), maxScale(0.0), scale(0), center_x(0), center_y(0)
 {
 
 }
@@ -61,8 +61,8 @@ void ImageWidget::setImage(QImage newImage)
     if (pixmap.isNull())
         return;
 
-    center_x = pixmap.width() / 2;
-    center_y = pixmap.height() / 2;
+    center_x = static_cast<double>(pixmap.width() / 2);
+    center_y = static_cast<double>(pixmap.height() / 2);
     int maxW = std::min(pixmap.width(), width());
     int maxH = std::min(pixmap.height(), height());
     minScale = std::min(static_cast<double>(maxW) / pixmap.width(), static_cast<double>(maxH) / pixmap.height());
@@ -115,7 +115,7 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
     if (pixmap.isNull())
         return;
 
-    if (event->buttons() && Qt::LeftButton)
+    if (event->buttons() & Qt::LeftButton)
     {
         QPoint diff = lastMousePos - event->pos();
         lastMousePos = event->pos();

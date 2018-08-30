@@ -40,7 +40,7 @@ public:
     Sorter(const QImage &img);
     QImage sort(QString pathType, int maxIntervals, bool randomizeIntervals,
                 int angle, bool toMerge, bool toReverse, bool toMirror,
-                bool toInterval, int lowThreshold, std::vector<QString> funcs,
+                bool toInterval, int lowThreshold, const std::vector<QString> &funcs,
                 bool toEdge, bool toMask, const QImage &mask, bool invertMask);
     QColor pixelAt(int i, int j);
 

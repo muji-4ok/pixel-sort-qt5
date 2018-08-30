@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
+#include <utility>
 
 OptionsDialog::OptionsDialog(QWidget *parent, int lastTab, QSize sourceSize) :
     QDialog(parent), sourceSize(sourceSize),
@@ -60,8 +61,9 @@ void OptionsDialog::setOptions(Options &options)
 
     if (!mask.isNull())
     {
-        QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        ui->maskLabel->setPixmap(pix);
+        QBitmap bit = QBitmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+//        QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->maskLabel->setPixmap(bit);
     }
 
     ui->skipBlackRadioButton->setChecked(options.invertMask);
@@ -82,8 +84,9 @@ void OptionsDialog::handleMaskOpenResults(QImage openedImage)
     }
 
     mask = openedImage.convertToFormat(QImage::Format_Mono);
-    QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    ui->maskLabel->setPixmap(pix);
+    QBitmap bit = QBitmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+//    QPixmap pix = QPixmap::fromImage(mask.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    ui->maskLabel->setPixmap(bit);
 
     canClose = true;
     enableInterface();
@@ -116,7 +119,7 @@ void OptionsDialog::on_doIntervalsCheckBox_stateChanged(int arg1)
         ui->randomizeCheckBox->setEnabled(false);
     }
     else
-        std::runtime_error("Checkbox cannot be partially checked");
+        throw std::runtime_error("Checkbox cannot be partially checked");
 }
 
 void OptionsDialog::on_doEdgesCheckBox_stateChanged(int arg1)
@@ -133,7 +136,7 @@ void OptionsDialog::on_doEdgesCheckBox_stateChanged(int arg1)
         ui->thresholdSpinBox->setEnabled(false);
     }
     else
-        std::runtime_error("Checkbox cannot be partially checked");
+        throw std::runtime_error("Checkbox cannot be partially checked");
 
 }
 
@@ -149,7 +152,7 @@ void OptionsDialog::on_doMaskCheckBox_stateChanged(int arg1)
         ui->loadMaskPushButton->setEnabled(false);
     }
     else
-        std::runtime_error("Checkbox cannot be partially checked");
+        throw std::runtime_error("Checkbox cannot be partially checked");
 }
 
 void OptionsDialog::on_loadMaskPushButton_clicked()

@@ -44,7 +44,7 @@ void MainWindow::on_actionOpen_triggered()
     QFileInfo fileInfo(filename);
     settings.setValue("lastDirectory", fileInfo.dir().absolutePath());
 
-    lastSavedFilename = QString();
+    lastSavedFilename.clear();
     lastOpenedFilename = filename;
 
     canClose = false;
@@ -67,7 +67,7 @@ void MainWindow::handleOpenResults(QImage openedImage)
     }
 
     options.mask = QImage();
-    sourceImage = openedImage;
+    sourceImage = std::move(openedImage);
     displayImage = sourceImage.copy(0, 0, sourceImage.width(), sourceImage.height());
     ui->imageWidget->setImage(displayImage);
 
@@ -97,7 +97,7 @@ void MainWindow::handleSortResults(QImage result)
     enableInterface();
     ui->statusBar->showMessage("Sort complete");
 
-    displayImage = result;
+    displayImage = std::move(result);
     ui->imageWidget->setImage(displayImage);
 }
 
