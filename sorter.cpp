@@ -121,18 +121,14 @@ std::vector<std::vector<Point>> Sorter::rows()
 
     for (int i = 0; i < height; ++i)
     {
-        out.push_back({});
+        out.emplace_back();
         out[i].reserve(width);
     }
 
     #pragma omp parallel for
     for (int i = 0; i < height; ++i)
-    {
-        //out.push_back({});
-
         for (int j = 0; j < width; ++j)
-            out[i].push_back(Point(i, j));
-    }
+            out[i].emplace_back(i, j);
 
     return out;
 }
@@ -143,19 +139,14 @@ std::vector<std::vector<Point>> Sorter::columns()
 
     for (int j = 0; j < width; ++j)
     {
-        out.push_back({});
+        out.emplace_back();
         out[j].reserve(height);
     }
 
     #pragma omp parallel for
     for (int j = 0; j < width; ++j)
-    {
-        //out.push_back({});
-
         for (int i = 0; i < height; ++i)
-            out[j].push_back(Point(i, j));
-
-    }
+            out[j].emplace_back(i, j);
 
     return out;
 }
@@ -172,7 +163,7 @@ std::vector<std::vector<Point>> Sorter::rectangles()
         int i1 = static_cast<int>(height) - borderDist;
         int j1 = static_cast<int>(width) - borderDist;
 
-        out.push_back({});
+        out.emplace_back();
         out[borderDist].reserve(j1 - j0 +
                                 i1 - i0 - 1 +
                                 j1 - 2 - j0 + 1 +
@@ -188,16 +179,16 @@ std::vector<std::vector<Point>> Sorter::rectangles()
         int j1 = static_cast<int>(width) - borderDist;
 
         for (int j = j0; j < j1; ++j)
-            out[borderDist].push_back(Point(i0, j));
+            out[borderDist].emplace_back(i0, j);
 
         for (int i = i0 + 1; i < i1; ++i)
-            out[borderDist].push_back(Point(i, j1 - 1));
+            out[borderDist].emplace_back(i, j1 - 1);
 
         for (int j = j1 - 2; j >= j0; --j)
-            out[borderDist].push_back(Point(i1 - 1, j));
+            out[borderDist].emplace_back(i1 - 1, j);
 
         for (int i = i1 - 2; i >= i0 + 1; --i)
-            out[borderDist].push_back(Point(i, j0));
+            out[borderDist].emplace_back(i, j0);
 
         std::rotate(out[borderDist].begin(),
                     out[borderDist].begin() + (rand() % out[borderDist].size()),
@@ -224,14 +215,14 @@ std::vector<std::vector<Point>> Sorter::octagons()
     for (int radius = 0, row = 0; radius < maxRadius; ++radius, ++row)
     {
         std::vector<Point> offsetSegment{};
-        out.push_back({});
+        out.emplace_back();
         int i_off = 0;
         int j_off = radius;
 
         while (true)
         {
             if (!pointsDone[i_off][j_off])
-                offsetSegment.push_back(Point(i_off, j_off));
+                offsetSegment.emplace_back(i_off, j_off);
 
             pointsDone[i_off][j_off] = true;
 
@@ -242,7 +233,7 @@ std::vector<std::vector<Point>> Sorter::octagons()
             {
                 if ((i_off + 1) <= radius && !pointsDone[i_off + 1][j_off])
                 {
-                    offsetSegment.push_back(Point(i_off + 1, j_off));
+                    offsetSegment.emplace_back(i_off + 1, j_off);
 
                     pointsDone[i_off + 1][j_off] = true;
                 }
@@ -257,19 +248,19 @@ std::vector<std::vector<Point>> Sorter::octagons()
 
         for (Point &p : offsetSegment)
             if (insideImage(i_center + p.i, j_center + p.j, width, height))
-                out[row].push_back(Point(i_center + p.i, j_center + p.j));
+                out[row].emplace_back(i_center + p.i, j_center + p.j);
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
             if (insideImage(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j, width, height))
-                out[row].push_back(Point(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j));
+                out[row].emplace_back(i_center + offsetSegment[i].i, j_center - offsetSegment[i].j);
 
         for (Point &p : offsetSegment)
             if (insideImage(i_center - p.i, j_center - p.j, width, height))
-                out[row].push_back(Point(i_center - p.i, j_center - p.j));
+                out[row].emplace_back(i_center - p.i, j_center - p.j);
 
         for (int i = offsetSegment.size() - 1; i >= 0; --i)
             if (insideImage(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j, width, height))
-                out[row].push_back(Point(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j));
+                out[row].emplace_back(i_center - offsetSegment[i].i, j_center + offsetSegment[i].j);
 
         if (out[row].size() == 0)
             continue;
@@ -324,7 +315,7 @@ std::vector<std::vector<Point>> Sorter::angled(int angle)
     {
         #pragma omp ordered
         {
-            line.push_back(Point(y, x));
+            line.emplace_back(y, x);
             err += deltaerr;
 
             if (2 * err >= deltax)
@@ -339,7 +330,7 @@ std::vector<std::vector<Point>> Sorter::angled(int angle)
 
     for (int di = -deltay; di < static_cast<int>(height); ++di)
     {
-        out.push_back({});
+        out.emplace_back();
         unsigned int lineSize = 0;
 
         #pragma omp parallel for
@@ -365,7 +356,7 @@ std::vector<std::vector<Point>> Sorter::angled(int angle)
             int j = p.j;
 
             if (0 <= i && i < height)
-                out[di + deltay].push_back(Point(i, j));
+                out[di + deltay].emplace_back(i, j);
             else if (out[di + deltay].size() > 0)
                 break;
         }
@@ -419,14 +410,6 @@ void Sorter::mergeIntoOne(std::vector<std::vector<Point>> &path)
     }
 
     path.erase(path.begin() + 1, path.end());
-
-    //while ((*path).size() > 1)
-    //{
-    //    (*path)[0].insert((*path)[0].end(), (*path)[1].begin(), (*path)[1].end());
-    //    path->erase(path->begin() + 1);
-    //}
-
-    //std::cout << "Merge done\n";
 }
 
 void Sorter::reverseSort(std::vector<std::vector<Point>>* path)

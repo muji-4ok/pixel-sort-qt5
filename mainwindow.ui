@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
-    <height>556</height>
+    <width>600</width>
+    <height>554</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -118,7 +118,17 @@
      </widget>
     </item>
     <item row="0" column="0" colspan="5">
-     <widget class="ImageWidget" name="imageWidget" native="true"/>
+     <widget class="ImageWidget" name="imageWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>400</width>
+        <height>300</height>
+       </size>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -127,7 +137,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>604</width>
+     <width>600</width>
      <height>21</height>
     </rect>
    </property>

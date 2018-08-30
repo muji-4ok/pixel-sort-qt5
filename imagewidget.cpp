@@ -175,8 +175,8 @@ void ImageWidget::capturePixelUnderMouse(int event_x, int event_y)
 
     if (scale >= 1)
     {
-        int left = center_x - width() / 2 / scale;
-        int top = center_y - height() / 2 / scale;
+        int left = center_x - (width() / 2) / scale;
+        int top = center_y - (height() / 2) / scale;
 
         if (left < 0)
             left /= 2;
@@ -187,10 +187,12 @@ void ImageWidget::capturePixelUnderMouse(int event_x, int event_y)
         int x = event_x / scale + left;
         int y = event_y / scale + top;
 
-        if (0 <= x && x < pixmap.width() && 0 <= y && y < pixmap.height())
+        if (0 <= x && x < pixmap.width() && 0 <= y && y < pixmap.height() &&
+            0 <= event_x && event_x < width() && 0 <= event_y && event_y < height())
         {
-            QImage im = pixmap.toImage();
-            QColor c = im.pixelColor(x, y);
+            QPixmap widgetView = grab();
+            QImage im = widgetView.toImage();
+            QColor c = im.pixelColor(event_x, event_y);
 
             emit changeRgbInfo(c);
         }
