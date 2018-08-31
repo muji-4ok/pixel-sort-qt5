@@ -36,7 +36,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="funcTab">
       <attribute name="title">
@@ -157,10 +157,10 @@
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defines the direction in which pixels are sorted.&lt;/p&gt;&lt;p&gt;Rows - horizontally&lt;/p&gt;&lt;p&gt;Colums - vertically&lt;/p&gt;&lt;p&gt;Angled - at a user picked angle&lt;/p&gt;&lt;p&gt;Rectangles - rectangles from center of the image&lt;/p&gt;&lt;p&gt;Octagons - octagons from center of the image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defines the direction in which pixels are sorted.&lt;/p&gt;&lt;p&gt;Rows - horizontally&lt;/p&gt;&lt;p&gt;Colums - vertically&lt;/p&gt;&lt;p&gt;Angled - at a user picked angle&lt;/p&gt;&lt;p&gt;Rectangles, octagons, circles - rectagnles/octagons/circles increasing in size from the center of the image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defines the direction in which pixels are sorted.&lt;/p&gt;&lt;p&gt;Rows - horizontally&lt;/p&gt;&lt;p&gt;Colums - vertically&lt;/p&gt;&lt;p&gt;Angled - at a user picked angle&lt;/p&gt;&lt;p&gt;Rectangles - rectangles from center of the image&lt;/p&gt;&lt;p&gt;Octagons - octagons from center of the image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defines the direction in which pixels are sorted.&lt;/p&gt;&lt;p&gt;Rows - horizontally&lt;/p&gt;&lt;p&gt;Colums - vertically&lt;/p&gt;&lt;p&gt;Angled - at a user picked angle&lt;/p&gt;&lt;p&gt;Rectangles, octagons, circles - rectagnles/octagons/circles increasing in size from the center of the image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <item>
           <property name="text">
@@ -185,6 +185,11 @@
          <item>
           <property name="text">
            <string>octagons</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>circles</string>
           </property>
          </item>
         </widget>
@@ -536,6 +541,9 @@
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::UpDownArrows</enum>
          </property>
+         <property name="minimum">
+          <number>12</number>
+         </property>
          <property name="maximum">
           <number>1000</number>
          </property>
@@ -580,6 +588,9 @@
          </property>
          <property name="whatsThis">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;After &amp;quot;sorting paths&amp;quot; are determined, they are split into intervals of desired length&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="minimum">
+          <number>12</number>
          </property>
          <property name="maximum">
           <number>1000</number>

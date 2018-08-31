@@ -25,6 +25,8 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
         path = angled(angle);
     else if (pathType == "octagons")
         path = octagons();
+    else if (pathType == "circles")
+        path = circles();
     else
         throw std::runtime_error("no pathType");
 
@@ -73,7 +75,9 @@ QImage Sorter::sort(QString pathType, int maxIntervals, bool randomizeIntervals,
 //    int vSize = 0;
 
 //    for (const auto &seq : path)
-//        vSize += sizeof(seq);
+//        vSize += sizeof(Point) * seq.size();
+
+//    qInfo() << vSize;
 
 //    qInfo() << path.size() * sizeof(std::vector<Point>) << path.size() << sizeof(std::vector<Point>);
 
@@ -239,6 +243,68 @@ std::vector<std::vector<Point>> Sorter::octagons()
         std::rotate(out[radius].begin(),
                     out[radius].begin() + (rand() % out[radius].size()),
                     out[radius].end());
+    }
+
+    return out;
+}
+
+std::vector<std::vector<Point> > Sorter::circles()
+{
+    int center_x = width / 2;
+    int center_y = height / 2;
+    int maxRadius = std::round(std::sqrt(std::pow(height / 2.0, 2) + std::pow(width / 2.0, 2)));
+
+    std::vector<std::vector<Point>> out{};
+    std::vector<int> circleRows(maxRadius, 0);
+
+    for (int radius = 1; radius <= maxRadius; ++radius)
+    {
+        std::vector<Point> offsets{};
+        offsets.reserve(radius);
+
+        #pragma omp parallel for ordered
+        for (int y = 0; y < radius; ++y)
+        {
+            #pragma omp ordered
+            {
+                int last_x = circleRows[y];
+                int x = last_x;
+
+                while (x * x + y * y < radius * radius)
+                {
+                    offsets.emplace_back(y, x);
+                    ++x;
+                }
+
+                circleRows[y] = x;
+            }
+        }
+
+        int row = radius - 1;
+        out.emplace_back();
+
+        for (Point &p : offsets)
+            if (insideImage(center_y + p.i, center_x + p.j, width, height))
+                out[row].emplace_back(center_y + p.i, center_x + p.j);
+
+        for (int i = offsets.size() - 1; i >= 0; --i)
+            if (insideImage(center_y + offsets[i].i, center_x - 1 - offsets[i].j, width, height))
+                out[row].emplace_back(center_y + offsets[i].i, center_x - 1 - offsets[i].j);
+
+        for (Point &p : offsets)
+            if (insideImage(center_y - 1 - p.i, center_x - 1 - p.j, width, height))
+                out[row].emplace_back(center_y - 1 - p.i, center_x - 1 - p.j);
+
+        for (int i = offsets.size() - 1; i >= 0; --i)
+            if (insideImage(center_y - 1 - offsets[i].i, center_x + offsets[i].j, width, height))
+                out[row].emplace_back(center_y - 1 - offsets[i].i, center_x + offsets[i].j);
+
+        if (out[row].size() == 0)
+            break;
+
+        std::rotate(out[row].begin(),
+                    out[row].begin() + (rand() % out[row].size()),
+                    out[row].end());
     }
 
     return out;

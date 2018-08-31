@@ -53,6 +53,7 @@ private:
     std::vector<std::vector<Point>> columns();
     std::vector<std::vector<Point>> rectangles();
     std::vector<std::vector<Point>> octagons();
+    std::vector<std::vector<Point>> circles();
     std::vector<std::vector<Point>> angled(int angle);
 
     void applyIntervals(std::vector<std::vector<Point>> &path, int maxIntervals, bool randomize);

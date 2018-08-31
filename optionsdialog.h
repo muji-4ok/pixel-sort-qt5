@@ -30,7 +30,7 @@ struct Options
     bool invertMask;
 
     Options() :
-        pathType("rows"), maxIntervals(0), randomizeIntervals(false), angle(0), toMerge(false), toReverse(false), toMirror(false),
+        pathType("rows"), maxIntervals(12), randomizeIntervals(false), angle(0), toMerge(false), toReverse(false), toMirror(false),
         toInterval(false), lowThreshold(0), funcs{"lightness"}, toEdge(false), toMask(false), mask(), invertMask(false) {}
 
     Options(QString pathType, int maxIntervals, bool randomizeIntervals, int angle, bool toMerge, bool toReverse, bool toMirror,
