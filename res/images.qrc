@@ -11,5 +11,6 @@
         <file>zoom_out_icon.png</file>
         <file>paste_icon.png</file>
         <file>copy_icon.png</file>
+        <file>app_icon.ico</file>
     </qresource>
 </RCC>
