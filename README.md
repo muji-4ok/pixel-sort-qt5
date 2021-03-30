@@ -5,3 +5,8 @@ Pixel sorter in C++ using Qt5
 * qt 5.11
 * opencv 3.4.2
 * openmp
+
+## Showcase
+
+![screenshot](screenshot.png)
+
